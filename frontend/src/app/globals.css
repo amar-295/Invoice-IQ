@@ -1,26 +1,86 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root { 
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* PRD DESIGN SYSTEM TOKENS */
+  --color-sovereign: #1E3A8A;
+  --color-azure: #3B82F6;
+  --color-stable: #16A34A;
+  --color-spike: #DC2626;
+
+  --color-background: #F4F7FB;
+  --color-surface: #FFFFFF;
+  --color-foreground: #0F172A;
+
+  --color-muted: #F8FAFC;
+  --color-muted-foreground: #64748B;
+
+  --color-primary: var(--color-sovereign);
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: var(--color-azure);
+  --color-secondary-foreground: #FFFFFF;
+
+  --color-destructive: var(--color-spike);
+  --color-destructive-foreground: #FFFFFF;
+
+  --color-border: #E2E8F0;
+
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+
+  --shadow-glow: 0 4px 14px rgba(59, 130, 246, 0.08);
+
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* 
+   * Responsive Layout Engine 
+   * Mobile: Full width centered column
+   * Desktop: Sidebar + Centered Sheet
+   */
+  .responsive-layout {
+    @apply min-h-screen flex flex-col md:flex-row;
+  }
+
+  /* The actual "Paper/Sheet" where content lives */
+  .app-content {
+    @apply flex-1 flex flex-col mx-auto bg-surface transition-all duration-300;
+    width: 100%;
+    max-width: 680px;
+    /* Focus Constraint */
+  }
+
+  .glow-shadow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  @media (min-width: 1280px) {
+    .app-content {
+      max-width: 800px;
+      /* Slight extra room on large screens */
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+  }
 }
