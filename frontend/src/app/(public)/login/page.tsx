@@ -6,8 +6,35 @@ import Link from "next/link"
 import { Github, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 function Login() {
+
+  const router = useRouter();
+
+  const handleGoogleLogin = async () => {
+    try{
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/loginWithGoogle`, {
+      method: "POST",
+      credentials : "include",
+    });
+    const data = await response.json();
+
+    if(data?.url){
+      router.push(data?.url);
+    }
+    else{
+      toast.error("Failed to initiate Google login. Please try again later.");
+    }
+  }
+  catch(e){
+    console.error("Error initiating Google login:", e);
+    toast.error( "An error occurred while initiating Google login. Please try again later.");
+  }
+  }
+
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-background-primary relative overflow-hidden font-outfit px-4 pt-32 pb-20">
       {/* Dynamic Background Elements */}
@@ -37,6 +64,7 @@ function Login() {
           <CardContent className="space-y-5 pb-10 pt-4 relative z-10 px-8">
             <div className="flex flex-col gap-4">
               <Button 
+                onClick={handleGoogleLogin}
                 variant="outline" 
                 className="w-full py-8 rounded-[1.25rem] border-border-primary bg-white/60 dark:bg-gray-900/40 backdrop-blur-md text-base font-semibold text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group/btn"
               >
@@ -87,4 +115,3 @@ function Login() {
 }
 
 export default Login
-
