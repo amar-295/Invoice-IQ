@@ -101,9 +101,9 @@ const Navbar = () => {
                   className="hidden md:flex items-center gap-2 font-medium rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100"
                   asChild
                 >
-                  <Link href="/signup">
+                  <Link href="/login">
                     <UserPlus className="h-4 w-4" />
-                    Sign Up
+                    Get Started
                   </Link>
                 </Button>
               </>
