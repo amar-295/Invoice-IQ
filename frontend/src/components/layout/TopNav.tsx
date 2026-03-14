@@ -1,8 +1,12 @@
 "use client";
 
-import { ChevronLeft, Plus } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronLeft, Plus, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 /**
  * Audit Update:
@@ -20,8 +24,15 @@ export function TopNav({
   actionText?: string,
   onBack?: () => void
 }) {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <nav className="flex items-center justify-between px-6 h-14 border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-40 w-full lg:hidden">
+    <nav className="flex items-center justify-between px-6 h-16 border-b border-border/5 bg-background/60 backdrop-blur-xl sticky top-0 z-40 w-full lg:hidden">
       <div className="flex items-center gap-3">
         {showBack ? (
           <button 
@@ -31,9 +42,16 @@ export function TopNav({
             <ChevronLeft className="w-5 h-5 text-primary" />
           </button>
         ) : (
-          <div className="text-lg font-bold tracking-tight text-primary">
-            Invoice<span className="text-foreground/80">IQ</span>
-          </div>
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/Logo.png" 
+              alt="Invoice-IQ Logo" 
+              width={100} 
+              height={30} 
+              className="object-contain"
+              style={{ width: 'auto', height: 'auto' }}
+            />
+          </Link>
         )}
       </div>
 
@@ -43,16 +61,26 @@ export function TopNav({
         </div>
       )}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        {mounted && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-[1.2rem] w-[1.2rem]" />
+            ) : (
+              <Moon className="h-[1.2rem] w-[1.2rem]" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        )}
         {!showBack && (
-          <>
-            <Button size="icon" variant="ghost" className="md:hidden text-primary">
-              <Plus className="w-5 h-5" />
-            </Button>
-            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-xs border border-border">
-              AK
-            </div>
-          </>
+          <Button variant="glossy" size="icon-sm" className="rounded-xl font-bold text-xs border border-border shadow-sm shrink-0">
+            AK
+          </Button>
         )}
       </div>
     </nav>

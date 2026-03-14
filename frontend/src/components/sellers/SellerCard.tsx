@@ -25,37 +25,37 @@ export function SellerCard({ seller }: SellerCardProps) {
 
   return (
     <div className={cn(
-      "flex justify-between items-center py-4 px-6 border-b border-border/30 last:border-0 hover:bg-muted/50 transition-all cursor-pointer group/item border-l-4",
+      "flex justify-between items-center py-5 px-6 border-b border-border/5 last:border-0 hover:bg-muted/30 hover:scale-[1.01] hover:shadow-lg hover:shadow-black/5 transition-all duration-300 ease-premium cursor-pointer group/item border-l-4",
       borderColor
     )}>
-      <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-tight text-foreground leading-tight">
-              {seller.name}
+      <div className="flex items-center gap-4 flex-1">
+        <div className="flex flex-col min-w-0">
+          <span className="text-base font-bold tracking-tight text-foreground leading-tight truncate group-hover/item:text-primary transition-colors">
+            {seller.name}
+          </span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="text-[11px] text-muted-foreground font-bold tracking-tight bg-muted/80 px-2 py-0.5 rounded-md">
+              {seller.category}
             </span>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[13px] text-muted-foreground font-normal uppercase tracking-wider bg-muted/60 px-1.5 py-0.5 rounded">
-                {seller.category}
-              </span>
-              <span className="text-[13px] text-muted-foreground flex items-center gap-1 font-semibold">
-                <ShoppingBag className="w-3.5 h-3.5" /> {seller.itemCount}
-              </span>
+            <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-bold italic">
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>{seller.itemCount} items</span>
             </div>
           </div>
+        </div>
       </div>
       
-      <div className="flex items-center gap-6 h-full py-1">
+      <div className="flex items-center gap-8 h-full">
         {/* Trend Section */}
-        <div className="hidden sm:flex flex-col items-end gap-1 min-w-[80px]">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase">Price Trend</span>
+        <div className="hidden sm:flex flex-col items-center justify-center min-w-[100px]">
           <PriceSparkline data={seller.prices} variant={trendDirection} />
         </div>
 
         {/* Status Area */}
-        <div className="flex flex-col items-end justify-center min-w-[90px] h-10">
+        <div className="flex flex-col items-end justify-center min-w-[85px]">
           <Badge 
             variant={seller.statusVariant} 
-            className="font-bold py-1 px-3 shadow-sm group-hover/item:scale-105 transition-transform"
+            className="font-bold text-[10px] tracking-wide py-1.5 px-3 shadow-sm border-white/10 group-hover/item:scale-105 transition-transform"
           >
             {seller.status}
           </Badge>
