@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import {
     LayoutDashboard,
     Users,
@@ -14,6 +15,8 @@ import {
     Plus,
     HelpCircle,
     LogOut,
+    Menu,
+    X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -47,40 +50,39 @@ const navItems = [
 
 const PrivateSideBar = () => {
     const pathname = usePathname()
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+    useEffect(() => {
+        setIsMobileOpen(false)
+    }, [pathname])
 
     const isActive = (href: string) => {
         if (href === "/home") return pathname === "/home"
         return pathname.startsWith(href)
     }
 
-    return (
-        <aside className="
-            fixed left-0 top-0 h-screen w-[220px] z-40
-            flex flex-col
-            bg-white dark:bg-[#111318]
-            border-r border-gray-100 dark:border-white/6
-            py-5
-            font-outfit
-            transition-colors duration-300
-            shadow-[1px_0_10px_rgba(0,0,0,0.02)] dark:shadow-none
-        ">
+    const sidebarBody = (
+        <>
             {/* ── Brand ─────────────────────────────────── */}
             <div className="flex px-5 mb-6 select-none">
                 <Link
                     href="/home"
+                    onClick={() => setIsMobileOpen(false)}
                     className="group relative w-full h-14 flex justify-center items-center rounded-lg overflow-hidden shrink-0 mt-2 transition-transform duration-300 hover:scale-[1.03] active:scale-95 cursor-pointer"
                 >
                     <Image
                         src="/Logo.png"
                         alt="Invoice IQ"
-                        fill={true}
-                        className="object-contain drop-shadow-sm dark:hidden"
+                        height={96}
+                        width={96}
+                        className="object-contain drop-shadow-sm dark:hidden w-24 h-24"
                     />
                     <Image
                         src="/DarkLogo.png"
                         alt="Invoice IQ"
-                        fill={true}
-                        className="object-contain hidden dark:block drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                        height={96}
+                        width={96}
+                        className="object-contain hidden dark:block drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] w-24 h-24"
                     />
                 </Link>
             </div>
@@ -116,6 +118,7 @@ const PrivateSideBar = () => {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                onClick={() => setIsMobileOpen(false)}
                                 className={cn(
                                     "group relative flex items-center justify-between px-3 py-2.5 rounded-lg",
                                     "text-sm font-medium transition-all duration-200 ease-out",
@@ -131,17 +134,15 @@ const PrivateSideBar = () => {
                                         ]
                                 )}
                             >
-                                {/* Active indicator pill sidebar */}
                                 {active && (
                                     <span className="
                                         absolute left-0 top-1/2 -translate-y-1/2
-                                        w-[3px] h-5 rounded-r-full
+                                        w-0.75 h-5 rounded-r-full
                                         bg-[#1E3A8A] dark:bg-blue-400
                                         animate-in fade-in slide-in-from-left-1 duration-300
-                                    "/>
+                                    " />
                                 )}
 
-                                {/* Hover translation wrapper */}
                                 <div className="flex items-center gap-3 transition-transform duration-200 group-hover:translate-x-1">
                                     <Icon
                                         className={cn(
@@ -156,7 +157,6 @@ const PrivateSideBar = () => {
                                     <span className="leading-none">{item.label}</span>
                                 </div>
 
-                                {/* Active Chevron */}
                                 {active && (
                                     <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0 animate-in fade-in slide-in-from-right-1 duration-300" />
                                 )}
@@ -206,7 +206,7 @@ const PrivateSideBar = () => {
                 ">
                     <div className="
                         w-9 h-9 rounded-full shrink-0 shadow-inner overflow-hidden
-                        bg-linear-to-tr from-[#1E3A8A] to-blue-400 dark:from-blue-600 dark:to-blue-400 
+                        bg-linear-to-tr from-[#1E3A8A] to-blue-400 dark:from-blue-600 dark:to-blue-400
                         flex items-center justify-center
                         transition-transform duration-300 group-hover:scale-105
                     ">
@@ -223,14 +223,60 @@ const PrivateSideBar = () => {
                     </div>
 
                     <button
-                        className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-white/10"
+                        className="inline-flex p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-white/10"
                         title="Log out"
                     >
                         <LogOut className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" />
                     </button>
                 </div>
             </div>
-        </aside>
+        </>
+    )
+
+    return (
+        <>
+            {/* Mobile menu trigger */}
+            <button
+                onClick={() => setIsMobileOpen((prev) => !prev)}
+                className="fixed top-4 left-4 z-50 md:hidden p-2.5 rounded-xl bg-white/90 dark:bg-[#111318]/90 border border-gray-200 dark:border-white/10 shadow-md backdrop-blur-sm text-gray-700 dark:text-white"
+                aria-label="Toggle sidebar"
+            >
+                {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Mobile backdrop */}
+            {isMobileOpen && (
+                <button
+                    className="fixed inset-0 bg-black/45 z-40 md:hidden"
+                    aria-label="Close sidebar"
+                    onClick={() => setIsMobileOpen(false)}
+                />
+            )}
+
+            {/* Mobile Drawer */}
+            <aside
+                className={cn(
+                    "fixed left-0 top-0 h-screen z-50 md:hidden",
+                    "flex flex-col",
+                    "w-[85%] max-w-70",
+                    "bg-white dark:bg-[#111318]",
+                    "border-r border-gray-100 dark:border-white/6",
+                    "py-5 font-outfit",
+                    "transition-transform duration-300",
+                    "shadow-[1px_0_10px_rgba(0,0,0,0.02)] dark:shadow-none",
+                    isMobileOpen ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none"
+                )}
+            >
+                {sidebarBody}
+            </aside>
+
+            {/* Tablet + Desktop Sticky Sidebar */}
+            <aside
+                className="hidden md:flex md:sticky md:top-0 md:h-screen md:w-55 shrink-0 z-30 flex-col bg-white dark:bg-[#111318] border-r border-gray-100 dark:border-white/6 py-5 font-outfit shadow-[1px_0_10px_rgba(0,0,0,0.02)] dark:shadow-none"
+            >
+                {sidebarBody}
+            </aside>
+        </>
     )
 }
 

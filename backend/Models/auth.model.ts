@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema<User>({
     email : {type : String, required : true, unique : true},
     avatar : {type : String, required : true},
     loginMode : {type : String, enum: ["Google", "Github"], required : true},
-    refreshToken: {type : String || null, required : true},
+    refreshToken: {type : String || null, required : false, default : null},
     createdAt : {type : Date, default : Date.now},
     updatedAt : {type : Date, default : Date.now}
 });

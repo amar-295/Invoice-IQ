@@ -113,14 +113,22 @@ const Navbar = () => {
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 font-outfit w-[95%] md:hidden">
         <div className="bg-white/40 dark:bg-gray-950/30 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl shadow-lg px-4 py-3 flex items-center justify-between w-full">
           {/* Logo */}
-          <div className="shrink-0 relative w-20 h-14">
+          <div className="shrink-0 relative p-1">
             <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
-              <div className="w-full h-full dark:bg-white dark:rounded-lg dark:px-1 transition-all duration-200 relative">
+              <div className="transition-all duration-200">
                 <Image
                   src="/Logo.png"
                   alt="InvoiceIQ Logo"
-                  fill={true}
-                  className="object-contain"
+                  height={90}
+                  width={90}
+                  className="dark:hidden shrink-0"
+                />
+                <Image
+                  src="/DarkLogo.png"
+                  alt="InvoiceIQ Logo"
+                  height={90}
+                  width={90}
+                  className="hidden dark:block shrink-0"
                 />
               </div>
             </Link>

@@ -5,6 +5,6 @@ const AuthRouter = Router();
 
 AuthRouter.post("/loginWithGoogle", LoginWithGoogle);
 AuthRouter.get("/google/callback", handleGoogleAuthentication);
-AuthRouter.get("/logout", handleLogoutUser);
+AuthRouter.post("/logout", handleLogoutUser);
 
 export default AuthRouter;

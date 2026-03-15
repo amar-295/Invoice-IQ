@@ -154,7 +154,7 @@ export const handleLogoutUser = async (req: Request, res: Response): Promise<Res
         return res.status(200).json({ message: "User logged out successfully!" });
     }
     catch(e : any){
-
+        console.log("Error during logout:", e);
         return res.status(500).json({ message: "Internal server error", error: e?.message || "Unknown error", });
     }
 }
