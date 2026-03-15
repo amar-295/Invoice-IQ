@@ -130,3 +130,31 @@ export const handleGoogleAuthentication = async (req: Request, res: Response): P
         return res.status(500).json({ message: "Internal server error", error: e?.message || "Unknown error", });
     }
 }
+
+export const handleLogoutUser = async (req: Request, res: Response): Promise<Response> => {
+    try{    
+        const {refreshToken} = req.cookies;
+        if(!refreshToken){
+            return res.status(400).json({ message: "User is already Logged Out!!" });
+        }
+
+        const hashedRefreshToken = hashString(refreshToken);
+        const user = await UserModel.findOne({ refreshToken: hashedRefreshToken });
+        if(!user){
+            res.clearCookie("refreshToken", cookieOptions);
+            res.clearCookie("accessToken", cookieOptions);
+            return res.status(400).json({ message: "User is already Logged Out!!" });
+        }    
+        
+        user.refreshToken = null;
+        await user.save();
+
+        res.clearCookie("refreshToken", cookieOptions);
+        res.clearCookie("accessToken", cookieOptions);
+        return res.status(200).json({ message: "User logged out successfully!" });
+    }
+    catch(e : any){
+
+        return res.status(500).json({ message: "Internal server error", error: e?.message || "Unknown error", });
+    }
+}
