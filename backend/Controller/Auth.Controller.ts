@@ -131,6 +131,14 @@ export const handleGoogleAuthentication = async (req: Request, res: Response): P
     }
 }
 
+export const getMe = (req: Request, res: Response): Response => {
+    return res.status(200).json({
+        userId: req.userId,
+        username: req.userName,
+        email: req.email,
+    });
+};
+
 export const handleLogoutUser = async (req: Request, res: Response): Promise<Response> => {
     try{    
         const {refreshToken} = req.cookies;
