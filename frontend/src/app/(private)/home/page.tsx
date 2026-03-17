@@ -6,7 +6,6 @@ import {
   AlertCircle,
   TrendingUp,
   Plus,
-  Scan,
   Sparkles,
   ArrowRight,
   ChevronRight,
@@ -163,10 +162,6 @@ export default async function HomePage() {
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1A1D24] border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-xs">
             <Plus className="w-4 h-4" />
             Add Delivery
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-[#1E3A8A] to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow-md">
-            <Scan className="w-4 h-4" />
-            Scan Invoice
           </button>
         </div>
       </div>

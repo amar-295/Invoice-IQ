@@ -12,7 +12,7 @@ import {
     FileText,
     ChevronRight,
     Settings,
-    Plus,
+    Sparkles,
     HelpCircle,
     LogOut,
     Menu,
@@ -120,8 +120,8 @@ const PrivateSideBar = () => {
                     hover:shadow-lg hover:shadow-blue-900/20 dark:hover:shadow-blue-500/20
                     active:scale-[0.98]
                 ">
-                    <Plus className="w-4 h-4 transition-transform duration-300 hover:rotate-90" strokeWidth={2.5} />
-                    <span>New Invoice</span>
+                    <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+                    <span>Summarise with AI</span>
                 </button>
             </div>
 
