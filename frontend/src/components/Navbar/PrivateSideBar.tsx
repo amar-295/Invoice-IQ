@@ -19,6 +19,9 @@ import {
     X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/hooks/useUser"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const navItems = [
     {
@@ -51,6 +54,26 @@ const navItems = [
 const PrivateSideBar = () => {
     const pathname = usePathname()
     const [isMobileOpen, setIsMobileOpen] = useState(false)
+    const { user } = useUser()
+    const router = useRouter()
+
+    const displayName = user?.username ?? "..."
+    const displayEmail = user?.email ?? ""
+    const avatarInitials = displayName.slice(0, 2).toUpperCase()
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            })
+            if (!res.ok) throw new Error("Logout failed")
+            toast.success("Logged out successfully!")
+            router.push("/home")
+        } catch {
+            toast.error("Logout failed. Please try again.")
+        }
+    }
 
     useEffect(() => {
         setIsMobileOpen(false)
@@ -210,19 +233,20 @@ const PrivateSideBar = () => {
                         flex items-center justify-center
                         transition-transform duration-300 group-hover:scale-105
                     ">
-                        <span className="text-white text-xs font-bold leading-none">JD</span>
+                        <span className="text-white text-xs font-bold leading-none">{avatarInitials}</span>
                     </div>
 
                     <div className="flex flex-col justify-center flex-1 overflow-hidden transition-transform duration-200 group-hover:translate-x-0.5">
                         <span className="text-sm font-semibold text-gray-900 dark:text-white truncate text-left leading-tight">
-                            John Doe
+                            {displayName}
                         </span>
                         <span className="text-[11px] font-medium text-gray-500 dark:text-white/40 truncate text-left mt-0.5">
-                            shop@example.com
+                            {displayEmail}
                         </span>
                     </div>
 
                     <button
+                        onClick={handleLogout}
                         className="inline-flex p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-white/10"
                         title="Log out"
                     >

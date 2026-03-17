@@ -15,6 +15,7 @@ import {
 import { useTheme } from "next-themes"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useUser } from "@/hooks/useUser"
 
 const PrivateTopBar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +23,11 @@ const PrivateTopBar = () => {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
+    const { user } = useUser();
+
+    const displayName = user?.username ?? "..."
+    const displayEmail = user?.email ?? ""
+    const avatarInitial = displayName.charAt(0).toUpperCase()
 
     // Close dropdown on click outside
     useEffect(() => {
@@ -105,12 +111,12 @@ const PrivateTopBar = () => {
                         shadow-inner text-white font-bold text-sm select-none
                         transition-transform duration-300 group-hover:scale-105
                     ">
-                        G
+                        {avatarInitial}
                     </div>
                     {/* User Info (Desktop only) */}
                     <div className="hidden md:flex flex-col text-left mr-1">
                         <span className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                            Gurudas
+                            {displayName}
                         </span>
                         <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
                             Admin
@@ -140,10 +146,10 @@ const PrivateTopBar = () => {
                     {/* Header */}
                     <div className="px-4 py-3.5 border-b border-gray-100 dark:border-white/10">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                            Gurudas
+                            {displayName}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                            gurudas@email.com
+                            {displayEmail}
                         </p>
                     </div>
 

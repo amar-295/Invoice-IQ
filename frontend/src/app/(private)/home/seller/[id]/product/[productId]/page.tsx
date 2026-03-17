@@ -10,6 +10,7 @@ import {
   Tag,
   FileText,
   ChevronRight,
+  User,
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -37,12 +38,23 @@ interface PurchaseRow {
   source: string;
 }
 
-interface ProductDetail {
+interface Ally {
+  name: string;
+}
+
+interface RawProductDetail {
   id: string;
   name: string;
   sellerId: string;
   sellerName: string;
   purchases: PurchaseRow[];
+}
+
+interface ProductDetail extends RawProductDetail {
+  userId: string;
+  unit: string;
+  normalizedName: string;
+  allies: Ally[];
 }
 
 const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
@@ -55,7 +67,7 @@ const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
   { key: "last5Years", label: "Last 5 Years" },
 ];
 
-const PRODUCT_DATA: Record<string, Record<string, ProductDetail>> = {
+const PRODUCT_DATA: Record<string, Record<string, RawProductDetail>> = {
   "1": {
     p1: {
       id: "p1",
@@ -243,6 +255,21 @@ function isDateInRange(date: Date, range: RangeKey) {
   return date >= start && date <= now;
 }
 
+const ALLIES_MAP: Record<string, Ally[]> = {
+  "Sunflower Oil": [{ name: "Refined Sunflower Oil" }, { name: "Safflower Oil" }],
+  "Mustard Oil": [{ name: "Kachi Ghani Mustard" }],
+  "Groundnut Oil": [{ name: "Peanut Oil" }],
+  "Ghee (Tin)": [{ name: "Cow Ghee" }, { name: "Desi Ghee" }],
+  "Basmati Rice": [{ name: "Rice" }, { name: "Premium Rice" }],
+  "Toor Dal": [{ name: "Arhar Dal" }],
+  "Wheat Flour": [{ name: "Atta" }],
+  Sugar: [{ name: "Granulated Sugar" }],
+  "Chana Dal": [{ name: "Split Bengal Gram" }],
+  "Full Cream Milk": [{ name: "Milk" }],
+  Paneer: [{ name: "Cottage Cheese" }],
+  "Curd (Dahi)": [{ name: "Yogurt" }, { name: "Dahi" }],
+};
+
 export default function ProductDetailPage({
   params,
 }: {
@@ -252,7 +279,19 @@ export default function ProductDetailPage({
   const [activeRange, setActiveRange] = useState<RangeKey>("last6Months");
   const [selectedMonth, setSelectedMonth] = useState("");
 
-  const product = PRODUCT_DATA[id]?.[productId];
+  const rawProduct = PRODUCT_DATA[id]?.[productId];
+
+  const product = useMemo<ProductDetail | null>(() => {
+    if (!rawProduct) return null;
+    const unit = rawProduct.purchases[0]?.unit ?? "unit";
+    return {
+      ...rawProduct,
+      userId: `user-${rawProduct.sellerId}`,
+      unit,
+      normalizedName: rawProduct.name.trim().toLowerCase(),
+      allies: ALLIES_MAP[rawProduct.name] ?? [],
+    };
+  }, [rawProduct]);
 
   const purchases = useMemo(() => product?.purchases ?? [], [product]);
 
@@ -352,10 +391,27 @@ export default function ProductDetailPage({
           {product.name}
         </h1>
 
-        <div className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
-          <Store className="w-4 h-4 text-gray-400" />
-          <span className="font-medium text-gray-600 dark:text-gray-300">Supplier:</span>
-          <span>{product.sellerName}</span>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
+            <Store className="w-4 h-4 text-gray-400" />
+            <span className="font-medium text-gray-600 dark:text-gray-300">Supplier:</span>
+            <span>{product.sellerName}</span>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
+            <Package className="w-4 h-4 text-gray-400" />
+            <span className="font-medium text-gray-600 dark:text-gray-300">Unit:</span>
+            <span>{product.unit}</span>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
+            <Tag className="w-4 h-4 text-gray-400" />
+            <span className="font-medium text-gray-600 dark:text-gray-300">Normalized:</span>
+            <span>{product.normalizedName}</span>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
+            <User className="w-4 h-4 text-gray-400" />
+            <span className="font-medium text-gray-600 dark:text-gray-300">Aliases:</span>
+            <span>{product.allies.length ? product.allies.map((ally) => ally.name).join(", ") : "—"}</span>
+          </div>
         </div>
       </div>
 
