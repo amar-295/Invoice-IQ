@@ -332,10 +332,13 @@ export default function SellerDetailPage({ params }: { params: Promise<{ id: str
 
                 {/* Action */}
                 <div className="flex justify-end">
-                  <button className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors group-hover:shadow-xs">
+                  <Link
+                    href={`/home/seller/${seller.id}/product/${product.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors group-hover:shadow-xs"
+                  >
                     View Details
                     <ChevronRight className="w-3 h-3" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
