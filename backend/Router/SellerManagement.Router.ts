@@ -6,5 +6,4 @@ const sellerManagementRouter = Router();
 sellerManagementRouter.post("/createSeller", CreateSellerController);
 sellerManagementRouter.get("/getSeller", GetSellerController);
 
-
 export default sellerManagementRouter;

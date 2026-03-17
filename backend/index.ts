@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import intializeMongoDB from './ConnectDB';
 import AuthRouter from './Router/Auth.Router';
 import SellerManagementRouter from './Router/SellerManagement.Router';
+import UserInterfaceRouter from './Router/UserInterface.Router';
 import cors from 'cors';
 
 const app = express();
@@ -24,6 +25,7 @@ intializeMongoDB();
 
 app.use("/api/auth", AuthRouter);
 app.use("/api/sellerManagement", SellerManagementRouter);
+app.use("/api/userInterface", UserInterfaceRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
