@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Wallet,
   Store,
@@ -56,217 +56,16 @@ interface AnalyticsData {
   insights: Insight[];
 }
 
-const BASE_MONTHLY_SPENDING = [
-  { date: "2025-04-01", label: "Apr", value: 16500 },
-  { date: "2025-05-01", label: "May", value: 18200 },
-  { date: "2025-06-01", label: "Jun", value: 17400 },
-  { date: "2025-07-01", label: "Jul", value: 19600 },
-  { date: "2025-08-01", label: "Aug", value: 21500 },
-  { date: "2025-09-01", label: "Sep", value: 23200 },
-  { date: "2025-10-01", label: "Oct", value: 24800 },
-  { date: "2025-11-01", label: "Nov", value: 22100 },
-  { date: "2025-12-01", label: "Dec", value: 25900 },
-  { date: "2026-01-01", label: "Jan", value: 20000 },
-  { date: "2026-02-01", label: "Feb", value: 18500 },
-  { date: "2026-03-01", label: "Mar", value: 27000 },
-];
-
-const RANGE_DATA: Record<Exclude<FilterKey, "custom">, AnalyticsData> = {
-  last7Days: {
-    totalSpending: 21450,
-    activeSuppliers: 5,
-    totalDeliveries: 9,
-    mostPurchasedProduct: "Milk",
-    spendingOverTime: [
-      { label: "Mon", value: 2800 },
-      { label: "Tue", value: 3100 },
-      { label: "Wed", value: 2450 },
-      { label: "Thu", value: 3650 },
-      { label: "Fri", value: 2900 },
-      { label: "Sat", value: 3320 },
-      { label: "Sun", value: 3230 },
-    ],
-    supplierSpending: [
-      { name: "Sharma Traders", value: 7200 },
-      { name: "Gupta Suppliers", value: 5600 },
-      { name: "Sai Dairy", value: 4800 },
-      { name: "Laxmi Spices", value: 2150 },
-      { name: "Om Trading", value: 1700 },
-    ],
-    topProducts: [
-      { name: "Milk", value: 120, unit: "L" },
-      { name: "Rice", value: 95, unit: "kg" },
-      { name: "Sugar", value: 62, unit: "kg" },
-      { name: "Oil", value: 45, unit: "L" },
-    ],
-    insights: [
-      { id: "w1", text: "Mustard Oil price increased by ₹10/L since last purchase", direction: "up" },
-      { id: "w2", text: "Sugar price decreased by ₹2/kg from Gupta Suppliers", direction: "down" },
-      { id: "w3", text: "Basmati Rice price increased by ₹4/kg this week", direction: "up" },
-    ],
-  },
-  lastMonth: {
-    totalSpending: 68200,
-    activeSuppliers: 7,
-    totalDeliveries: 21,
-    mostPurchasedProduct: "Basmati Rice",
-    spendingOverTime: [
-      { label: "Week 1", value: 15200 },
-      { label: "Week 2", value: 17400 },
-      { label: "Week 3", value: 16300 },
-      { label: "Week 4", value: 19300 },
-    ],
-    supplierSpending: [
-      { name: "Sharma Traders", value: 22000 },
-      { name: "Gupta Suppliers", value: 16400 },
-      { name: "Verma Wholesalers", value: 12100 },
-      { name: "Sai Dairy", value: 9800 },
-      { name: "Om Trading", value: 7900 },
-    ],
-    topProducts: [
-      { name: "Rice", value: 220, unit: "kg" },
-      { name: "Sugar", value: 145, unit: "kg" },
-      { name: "Dal", value: 120, unit: "kg" },
-      { name: "Oil", value: 90, unit: "L" },
-    ],
-    insights: [
-      { id: "m1", text: "Basmati Rice price increased by ₹15/kg compared to last month", direction: "up" },
-      { id: "m2", text: "Sugar price decreased by ₹2/kg from Gupta Suppliers", direction: "down" },
-      { id: "m3", text: "Mustard Oil price increased by ₹10/L since last purchase", direction: "up" },
-    ],
-  },
-  last6Months: {
-    totalSpending: 145000,
-    activeSuppliers: 8,
-    totalDeliveries: 42,
-    mostPurchasedProduct: "Basmati Rice",
-    spendingOverTime: [
-      { label: "Oct", value: 24800 },
-      { label: "Nov", value: 22100 },
-      { label: "Dec", value: 25900 },
-      { label: "Jan", value: 20000 },
-      { label: "Feb", value: 18500 },
-      { label: "Mar", value: 27000 },
-    ],
-    supplierSpending: [
-      { name: "Sharma Traders", value: 40000 },
-      { name: "Gupta Suppliers", value: 25000 },
-      { name: "Verma Wholesalers", value: 18000 },
-      { name: "Sai Dairy", value: 22000 },
-      { name: "Om Trading", value: 21000 },
-      { name: "Laxmi Spices", value: 9000 },
-    ],
-    topProducts: [
-      { name: "Rice", value: 500, unit: "kg" },
-      { name: "Sugar", value: 320, unit: "kg" },
-      { name: "Dal", value: 210, unit: "kg" },
-      { name: "Oil", value: 180, unit: "L" },
-    ],
-    insights: [
-      { id: "s1", text: "Mustard Oil price increased by ₹10/L since last purchase", direction: "up" },
-      { id: "s2", text: "Basmati Rice price increased by ₹15/kg compared to last month", direction: "up" },
-      { id: "s3", text: "Sugar price decreased by ₹2/kg from Gupta Suppliers", direction: "down" },
-      { id: "s4", text: "Toor Dal price increased by ₹8/kg in March deliveries", direction: "up" },
-    ],
-  },
-  lastYear: {
-    totalSpending: 271700,
-    activeSuppliers: 11,
-    totalDeliveries: 88,
-    mostPurchasedProduct: "Basmati Rice",
-    spendingOverTime: BASE_MONTHLY_SPENDING.map((month) => ({
-      label: month.label,
-      value: month.value,
-    })),
-    supplierSpending: [
-      { name: "Sharma Traders", value: 74200 },
-      { name: "Gupta Suppliers", value: 50100 },
-      { name: "Verma Wholesalers", value: 33000 },
-      { name: "Sai Dairy", value: 39000 },
-      { name: "Om Trading", value: 42800 },
-      { name: "Laxmi Spices", value: 19200 },
-      { name: "Bharat Distributors", value: 13400 },
-    ],
-    topProducts: [
-      { name: "Rice", value: 910, unit: "kg" },
-      { name: "Sugar", value: 610, unit: "kg" },
-      { name: "Dal", value: 520, unit: "kg" },
-      { name: "Oil", value: 420, unit: "L" },
-      { name: "Milk", value: 380, unit: "L" },
-    ],
-    insights: [
-      { id: "y1", text: "Mustard Oil price increased by ₹10/L since last purchase", direction: "up" },
-      { id: "y2", text: "Basmati Rice price increased by ₹15/kg compared to last month", direction: "up" },
-      { id: "y3", text: "Sugar price decreased by ₹2/kg from Gupta Suppliers", direction: "down" },
-      { id: "y4", text: "Milk price decreased by ₹1/L from Sai Dairy", direction: "down" },
-      { id: "y5", text: "Ghee price increased by ₹30/kg in festival season", direction: "up" },
-    ],
-  },
+const EMPTY_ANALYTICS_DATA: AnalyticsData = {
+  totalSpending: 0,
+  activeSuppliers: 0,
+  totalDeliveries: 0,
+  mostPurchasedProduct: "-",
+  spendingOverTime: [],
+  supplierSpending: [],
+  topProducts: [],
+  insights: [],
 };
-
-function buildCustomData(startDate: string, endDate: string): AnalyticsData {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  const validRange =
-    !Number.isNaN(start.getTime()) &&
-    !Number.isNaN(end.getTime()) &&
-    start <= end;
-
-  if (!validRange) {
-    return RANGE_DATA.last6Months;
-  }
-
-  const filteredMonths = BASE_MONTHLY_SPENDING.filter((month) => {
-    const date = new Date(month.date);
-    return date >= start && date <= end;
-  });
-
-  if (!filteredMonths.length) {
-    return {
-      totalSpending: 0,
-      activeSuppliers: 0,
-      totalDeliveries: 0,
-      mostPurchasedProduct: "—",
-      spendingOverTime: [],
-      supplierSpending: [],
-      topProducts: [],
-      insights: [],
-    };
-  }
-
-  const totalSpending = filteredMonths.reduce((sum, month) => sum + month.value, 0);
-  const monthFactor = filteredMonths.length / 12;
-
-  return {
-    totalSpending,
-    activeSuppliers: Math.max(2, Math.round(11 * monthFactor)),
-    totalDeliveries: Math.max(4, Math.round(88 * monthFactor)),
-    mostPurchasedProduct: "Basmati Rice",
-    spendingOverTime: filteredMonths.map((month) => ({
-      label: month.label,
-      value: month.value,
-    })),
-    supplierSpending: [
-      { name: "Sharma Traders", value: Math.round(74200 * monthFactor) },
-      { name: "Gupta Suppliers", value: Math.round(50100 * monthFactor) },
-      { name: "Verma Wholesalers", value: Math.round(33000 * monthFactor) },
-      { name: "Sai Dairy", value: Math.round(39000 * monthFactor) },
-      { name: "Om Trading", value: Math.round(42800 * monthFactor) },
-    ].filter((supplier) => supplier.value > 0),
-    topProducts: [
-      { name: "Rice", value: Math.round(910 * monthFactor), unit: "kg" },
-      { name: "Sugar", value: Math.round(610 * monthFactor), unit: "kg" },
-      { name: "Dal", value: Math.round(520 * monthFactor), unit: "kg" },
-      { name: "Oil", value: Math.round(420 * monthFactor), unit: "L" },
-    ].filter((product) => product.value > 0),
-    insights: [
-      { id: "c1", text: "Mustard Oil price increased by ₹10/L since last purchase", direction: "up" },
-      { id: "c2", text: "Sugar price decreased by ₹2/kg from Gupta Suppliers", direction: "down" },
-      { id: "c3", text: "Basmati Rice price increased by ₹15/kg compared to last month", direction: "up" },
-    ],
-  };
-}
 
 function formatCurrency(value: number) {
   return `₹${value.toLocaleString("en-IN")}`;
@@ -276,12 +75,75 @@ export default function AnalyticsPage() {
   const [filter, setFilter] = useState<FilterKey>("last6Months");
   const [customFrom, setCustomFrom] = useState("2025-10-01");
   const [customTo, setCustomTo] = useState("2026-03-31");
+  const [activeData, setActiveData] = useState<AnalyticsData>(EMPTY_ANALYTICS_DATA);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const activeData = useMemo(() => {
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const params = new URLSearchParams({ filter });
+
+        if (filter === "custom") {
+          params.set("from", customFrom);
+          params.set("to", customTo);
+        }
+
+        const response = await fetch(`${baseUrl}/api/analytics/summary?${params.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result?.message || "Failed to load analytics data.");
+        }
+
+        setActiveData({
+          totalSpending: Number(result?.data?.totalSpending || 0),
+          activeSuppliers: Number(result?.data?.activeSuppliers || 0),
+          totalDeliveries: Number(result?.data?.totalDeliveries || 0),
+          mostPurchasedProduct: String(result?.data?.mostPurchasedProduct || "-"),
+          spendingOverTime: Array.isArray(result?.data?.spendingOverTime) ? result.data.spendingOverTime : [],
+          supplierSpending: Array.isArray(result?.data?.supplierSpending) ? result.data.supplierSpending : [],
+          topProducts: Array.isArray(result?.data?.topProducts) ? result.data.topProducts : [],
+          insights: Array.isArray(result?.data?.insights) ? result.data.insights : [],
+        });
+      } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setError(err instanceof Error ? err.message : "Failed to load analytics data.");
+        setActiveData(EMPTY_ANALYTICS_DATA);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
     if (filter === "custom") {
-      return buildCustomData(customFrom, customTo);
+      const start = new Date(customFrom);
+      const end = new Date(customTo);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+        setError("Please select a valid custom date range.");
+        setActiveData(EMPTY_ANALYTICS_DATA);
+        setIsLoading(false);
+        return () => controller.abort();
+      }
     }
-    return RANGE_DATA[filter];
+
+    fetchAnalytics();
+
+    return () => controller.abort();
   }, [filter, customFrom, customTo]);
 
   const spendingLineData = {
@@ -441,6 +303,18 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          {error}
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:bg-[#1A1D24] dark:text-slate-300">
+          Loading analytics from database...
+        </div>
+      )}
+
       {filter === "custom" && (
         <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-end gap-3">
@@ -516,7 +390,13 @@ export default function AnalyticsPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Track total spending trend across selected time period.</p>
         </div>
         <div className="h-72">
-          <Line data={spendingLineData} options={spendingLineOptions} />
+          {activeData.spendingOverTime.length > 0 ? (
+            <Line data={spendingLineData} options={spendingLineOptions} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+              No spending data available for selected range.
+            </div>
+          )}
         </div>
       </div>
 
@@ -527,7 +407,13 @@ export default function AnalyticsPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Compare how spending is distributed across suppliers.</p>
         </div>
         <div className="h-80">
-          <Bar data={supplierBarData} options={supplierBarOptions} />
+          {activeData.supplierSpending.length > 0 ? (
+            <Bar data={supplierBarData} options={supplierBarOptions} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+              No supplier spending data available.
+            </div>
+          )}
         </div>
       </div>
 
@@ -538,7 +424,13 @@ export default function AnalyticsPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Products with highest purchased quantities in selected period.</p>
         </div>
         <div className="h-80">
-          <Bar data={productHorizontalBarData} options={productHorizontalBarOptions} />
+          {activeData.topProducts.length > 0 ? (
+            <Bar data={productHorizontalBarData} options={productHorizontalBarOptions} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+              No product purchase data available.
+            </div>
+          )}
         </div>
       </div>
 

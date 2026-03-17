@@ -1,7 +1,8 @@
 "use client";
 
-import React, { use, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Store,
@@ -11,6 +12,8 @@ import {
   FileText,
   ChevronRight,
   User,
+  Wallet,
+  Activity,
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -33,7 +36,10 @@ interface PurchaseRow {
   id: string;
   date: string;
   quantity: number;
+  quantityLabel?: string;
   unit: string;
+  totalPrice: number;
+  priceLabel?: string;
   pricePerUnit: number;
   source: string;
 }
@@ -42,19 +48,26 @@ interface Ally {
   name: string;
 }
 
-interface RawProductDetail {
+interface ProductAnalytics {
+  totalPurchases: number;
+  totalSpend: number;
+  totalQuantity: number;
+  averagePricePerUnit: number;
+  latestPurchaseDate: string | null;
+  latestPurchasePricePerUnit: number | null;
+  availableMonths: string[];
+}
+
+interface ProductDetail {
   id: string;
   name: string;
   sellerId: string;
   sellerName: string;
-  purchases: PurchaseRow[];
-}
-
-interface ProductDetail extends RawProductDetail {
-  userId: string;
   unit: string;
   normalizedName: string;
   allies: Ally[];
+  purchases: PurchaseRow[];
+  analytics: ProductAnalytics;
 }
 
 const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
@@ -67,153 +80,24 @@ const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
   { key: "last5Years", label: "Last 5 Years" },
 ];
 
-const PRODUCT_DATA: Record<string, Record<string, RawProductDetail>> = {
-  "1": {
-    p1: {
-      id: "p1",
-      name: "Sunflower Oil",
-      sellerId: "1",
-      sellerName: "Om Trading Co.",
-      purchases: [
-        { id: "a1", date: "2026-03-15", quantity: 20, unit: "L", pricePerUnit: 140, source: "Invoice Upload" },
-        { id: "a2", date: "2026-02-28", quantity: 18, unit: "L", pricePerUnit: 138, source: "Manual Entry" },
-        { id: "a3", date: "2026-02-10", quantity: 20, unit: "L", pricePerUnit: 136, source: "Invoice Upload" },
-        { id: "a4", date: "2026-01-14", quantity: 16, unit: "L", pricePerUnit: 132, source: "Invoice Upload" },
-        { id: "a5", date: "2025-12-12", quantity: 15, unit: "L", pricePerUnit: 129, source: "Invoice Upload" },
-      ],
-    },
-    p2: {
-      id: "p2",
-      name: "Mustard Oil",
-      sellerId: "1",
-      sellerName: "Om Trading Co.",
-      purchases: [
-        { id: "b1", date: "2026-03-15", quantity: 10, unit: "L", pricePerUnit: 175, source: "Invoice Upload" },
-        { id: "b2", date: "2026-03-01", quantity: 10, unit: "L", pricePerUnit: 168, source: "Invoice Upload" },
-        { id: "b3", date: "2026-02-14", quantity: 8, unit: "L", pricePerUnit: 165, source: "Manual Entry" },
-        { id: "b4", date: "2026-01-10", quantity: 10, unit: "L", pricePerUnit: 162, source: "Invoice Upload" },
-      ],
-    },
-    p3: {
-      id: "p3",
-      name: "Groundnut Oil",
-      sellerId: "1",
-      sellerName: "Om Trading Co.",
-      purchases: [
-        { id: "c1", date: "2026-03-08", quantity: 15, unit: "L", pricePerUnit: 160, source: "Invoice Upload" },
-        { id: "c2", date: "2026-02-08", quantity: 15, unit: "L", pricePerUnit: 157, source: "Invoice Upload" },
-        { id: "c3", date: "2026-01-07", quantity: 12, unit: "L", pricePerUnit: 154, source: "Manual Entry" },
-      ],
-    },
-    p4: {
-      id: "p4",
-      name: "Ghee (Tin)",
-      sellerId: "1",
-      sellerName: "Om Trading Co.",
-      purchases: [
-        { id: "d1", date: "2026-03-01", quantity: 5, unit: "kg", pricePerUnit: 580, source: "Invoice Upload" },
-        { id: "d2", date: "2026-02-01", quantity: 5, unit: "kg", pricePerUnit: 565, source: "Invoice Upload" },
-        { id: "d3", date: "2026-01-01", quantity: 4, unit: "kg", pricePerUnit: 552, source: "Manual Entry" },
-      ],
-    },
-  },
-  "2": {
-    p1: {
-      id: "p1",
-      name: "Basmati Rice",
-      sellerId: "2",
-      sellerName: "Bharat Distributors",
-      purchases: [
-        { id: "e1", date: "2026-03-12", quantity: 50, unit: "kg", pricePerUnit: 120, source: "Invoice Upload" },
-        { id: "e2", date: "2026-02-25", quantity: 45, unit: "kg", pricePerUnit: 115, source: "Invoice Upload" },
-        { id: "e3", date: "2026-01-28", quantity: 40, unit: "kg", pricePerUnit: 112, source: "Manual Entry" },
-        { id: "e4", date: "2025-12-20", quantity: 45, unit: "kg", pricePerUnit: 109, source: "Invoice Upload" },
-      ],
-    },
-    p2: {
-      id: "p2",
-      name: "Toor Dal",
-      sellerId: "2",
-      sellerName: "Bharat Distributors",
-      purchases: [
-        { id: "f1", date: "2026-03-12", quantity: 25, unit: "kg", pricePerUnit: 145, source: "Invoice Upload" },
-        { id: "f2", date: "2026-02-12", quantity: 24, unit: "kg", pricePerUnit: 141, source: "Invoice Upload" },
-        { id: "f3", date: "2026-01-10", quantity: 22, unit: "kg", pricePerUnit: 136, source: "Manual Entry" },
-      ],
-    },
-    p3: {
-      id: "p3",
-      name: "Wheat Flour",
-      sellerId: "2",
-      sellerName: "Bharat Distributors",
-      purchases: [
-        { id: "g1", date: "2026-03-05", quantity: 100, unit: "kg", pricePerUnit: 38, source: "Invoice Upload" },
-        { id: "g2", date: "2026-02-05", quantity: 95, unit: "kg", pricePerUnit: 37, source: "Invoice Upload" },
-      ],
-    },
-    p4: {
-      id: "p4",
-      name: "Sugar",
-      sellerId: "2",
-      sellerName: "Bharat Distributors",
-      purchases: [
-        { id: "h1", date: "2026-02-28", quantity: 50, unit: "kg", pricePerUnit: 42, source: "Invoice Upload" },
-        { id: "h2", date: "2026-01-28", quantity: 50, unit: "kg", pricePerUnit: 45, source: "Manual Entry" },
-        { id: "h3", date: "2025-12-15", quantity: 45, unit: "kg", pricePerUnit: 44, source: "Invoice Upload" },
-      ],
-    },
-    p5: {
-      id: "p5",
-      name: "Chana Dal",
-      sellerId: "2",
-      sellerName: "Bharat Distributors",
-      purchases: [
-        { id: "i1", date: "2026-02-20", quantity: 30, unit: "kg", pricePerUnit: 92, source: "Invoice Upload" },
-        { id: "i2", date: "2026-01-18", quantity: 28, unit: "kg", pricePerUnit: 90, source: "Invoice Upload" },
-      ],
-    },
-  },
-  "3": {
-    p1: {
-      id: "p1",
-      name: "Full Cream Milk",
-      sellerId: "3",
-      sellerName: "Sai Dairy Products",
-      purchases: [
-        { id: "j1", date: "2026-03-10", quantity: 100, unit: "L", pricePerUnit: 58, source: "Invoice Upload" },
-        { id: "j2", date: "2026-02-10", quantity: 95, unit: "L", pricePerUnit: 60, source: "Invoice Upload" },
-      ],
-    },
-    p2: {
-      id: "p2",
-      name: "Paneer",
-      sellerId: "3",
-      sellerName: "Sai Dairy Products",
-      purchases: [
-        { id: "k1", date: "2026-03-10", quantity: 10, unit: "kg", pricePerUnit: 340, source: "Invoice Upload" },
-        { id: "k2", date: "2026-02-10", quantity: 10, unit: "kg", pricePerUnit: 360, source: "Invoice Upload" },
-        { id: "k3", date: "2026-01-10", quantity: 9, unit: "kg", pricePerUnit: 355, source: "Manual Entry" },
-      ],
-    },
-    p3: {
-      id: "p3",
-      name: "Curd (Dahi)",
-      sellerId: "3",
-      sellerName: "Sai Dairy Products",
-      purchases: [
-        { id: "l1", date: "2026-03-08", quantity: 20, unit: "kg", pricePerUnit: 65, source: "Invoice Upload" },
-        { id: "l2", date: "2026-02-08", quantity: 18, unit: "kg", pricePerUnit: 66, source: "Invoice Upload" },
-      ],
-    },
-  },
-};
-
 function formatDate(isoDate: string) {
   return new Date(isoDate).toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatCompactQuantity(value: number, unit: string) {
+  return `${value} ${unit}`.trim();
 }
 
 function formatMonthLabel(isoDate: string) {
@@ -255,21 +139,6 @@ function isDateInRange(date: Date, range: RangeKey) {
   return date >= start && date <= now;
 }
 
-const ALLIES_MAP: Record<string, Ally[]> = {
-  "Sunflower Oil": [{ name: "Refined Sunflower Oil" }, { name: "Safflower Oil" }],
-  "Mustard Oil": [{ name: "Kachi Ghani Mustard" }],
-  "Groundnut Oil": [{ name: "Peanut Oil" }],
-  "Ghee (Tin)": [{ name: "Cow Ghee" }, { name: "Desi Ghee" }],
-  "Basmati Rice": [{ name: "Rice" }, { name: "Premium Rice" }],
-  "Toor Dal": [{ name: "Arhar Dal" }],
-  "Wheat Flour": [{ name: "Atta" }],
-  Sugar: [{ name: "Granulated Sugar" }],
-  "Chana Dal": [{ name: "Split Bengal Gram" }],
-  "Full Cream Milk": [{ name: "Milk" }],
-  Paneer: [{ name: "Cottage Cheese" }],
-  "Curd (Dahi)": [{ name: "Yogurt" }, { name: "Dahi" }],
-};
-
 export default function ProductDetailPage({
   params,
 }: {
@@ -278,20 +147,35 @@ export default function ProductDetailPage({
   const { id, productId } = use(params);
   const [activeRange, setActiveRange] = useState<RangeKey>("last6Months");
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const rawProduct = PRODUCT_DATA[id]?.[productId];
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const response = await fetch(`${baseUrl}/api/product/${id}/${productId}`, {
+          credentials: "include",
+        });
 
-  const product = useMemo<ProductDetail | null>(() => {
-    if (!rawProduct) return null;
-    const unit = rawProduct.purchases[0]?.unit ?? "unit";
-    return {
-      ...rawProduct,
-      userId: `user-${rawProduct.sellerId}`,
-      unit,
-      normalizedName: rawProduct.name.trim().toLowerCase(),
-      allies: ALLIES_MAP[rawProduct.name] ?? [],
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result?.message || "Failed to fetch product details.");
+        }
+
+        setProduct(result?.data || null);
+      } catch (error) {
+        console.error("Error fetching product detail:", error);
+        toast.error(error instanceof Error ? error.message : "Failed to load product details.");
+        setProduct(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [rawProduct]);
+
+    fetchProduct();
+  }, [id, productId]);
 
   const purchases = useMemo(() => product?.purchases ?? [], [product]);
 
@@ -356,6 +240,15 @@ export default function ProductDetailPage({
     },
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Loading product details...</h2>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[60vh]">
@@ -372,7 +265,7 @@ export default function ProductDetailPage({
     );
   }
 
-  const totalRowPrice = (row: PurchaseRow) => row.quantity * row.pricePerUnit;
+  const totalRowPrice = (row: PurchaseRow) => row.totalPrice;
 
   return (
     <div className="p-6 md:p-8 max-w-400 mx-auto space-y-8">
@@ -411,6 +304,53 @@ export default function ProductDetailPage({
             <User className="w-4 h-4 text-gray-400" />
             <span className="font-medium text-gray-600 dark:text-gray-300">Aliases:</span>
             <span>{product.allies.length ? product.allies.map((ally) => ally.name).join(", ") : "—"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-xs dark:border-white/10 dark:bg-[#1A1D24]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
+              <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">Total Deliveries</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{product.analytics.totalPurchases}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-xs dark:border-white/10 dark:bg-[#1A1D24]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+              <Wallet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">Total Spend</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(product.analytics.totalSpend)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-xs dark:border-white/10 dark:bg-[#1A1D24]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10">
+              <Package className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">Total Quantity</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCompactQuantity(product.analytics.totalQuantity, product.unit)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-xs dark:border-white/10 dark:bg-[#1A1D24]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-500/10">
+              <Tag className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">Avg Price / Unit</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(product.analytics.averagePricePerUnit)}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -456,6 +396,11 @@ export default function ProductDetailPage({
             className="w-full sm:w-56 px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           />
           <p className="text-xs text-gray-400">Selecting a month automatically disables time-range filters.</p>
+          {product.analytics.availableMonths.length > 0 && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Available months: {product.analytics.availableMonths.join(", ")}
+            </p>
+          )}
         </div>
       </div>
 
@@ -491,14 +436,14 @@ export default function ProductDetailPage({
                   </span>
                   <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
                     <Package className="w-3.5 h-3.5 text-gray-400" />
-                    {row.quantity}
+                    {row.quantityLabel || row.quantity}
                   </span>
                   <span className="text-gray-600 dark:text-gray-300">{row.unit}</span>
                   <span className="flex items-center gap-1.5 text-gray-900 dark:text-white font-medium">
                     <Tag className="w-3.5 h-3.5 text-gray-400" />
-                    ₹{row.pricePerUnit}
+                    {formatCurrency(row.pricePerUnit)}
                   </span>
-                  <span className="text-gray-900 dark:text-white font-semibold">₹{totalRowPrice(row)}</span>
+                  <span className="text-gray-900 dark:text-white font-semibold">{formatCurrency(totalRowPrice(row))}</span>
                   <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
                     <FileText className="w-3.5 h-3.5 text-gray-400" />
                     {row.source}
@@ -524,16 +469,27 @@ export default function ProductDetailPage({
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Price movement from first recorded purchase to most recent purchase.</p>
         </div>
 
-        <div className="h-70">
-          <Line data={chartData} options={chartOptions} />
-        </div>
+        {chartRows.length > 0 ? (
+          <div className="h-70">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        ) : (
+          <div className="flex h-70 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
+            No chart data available for the selected range.
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-2 mt-4">
-          <span className="text-xs text-gray-500 dark:text-gray-400">Need deeper history?</span>
-          <button className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
-            View Details
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Latest purchase: {product.analytics.latestPurchaseDate ? `${formatDate(product.analytics.latestPurchaseDate)} at ${formatCurrency(product.analytics.latestPurchasePricePerUnit || 0)}/unit` : "No purchases yet"}
+          </span>
+          <Link
+            href={`/home/seller/${id}`}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+          >
+            Back to Seller
             <ChevronRight className="w-3 h-3" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

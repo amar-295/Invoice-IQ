@@ -6,6 +6,8 @@ import AuthRouter from './Router/Auth.Router';
 import SellerManagementRouter from './Router/SellerManagement.Router';
 import UserInterfaceRouter from './Router/UserInterface.Router';
 import DeliveryRouter from './Router/Delivery.Router';
+import ProductRouter from './Router/Product.Router';
+import AnalyticsRouter from './Router/Analytics.Router';
 import cors from 'cors';
 
 const app = express();
@@ -19,8 +21,8 @@ app.use("/api",cors({
 
 
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "12mb" }));
+app.use(express.urlencoded({ extended: true, limit: "12mb" }));
 
 intializeMongoDB();
 
@@ -28,6 +30,8 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/sellerManagement", SellerManagementRouter);
 app.use("/api/userInterface", UserInterfaceRouter);
 app.use("/api/delivery", DeliveryRouter);
+app.use("/api/product", ProductRouter);
+app.use("/api/analytics", AnalyticsRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

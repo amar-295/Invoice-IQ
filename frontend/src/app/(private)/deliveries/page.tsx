@@ -170,7 +170,7 @@ export default function DeliveriesPage() {
           </div>
 
           <Link
-            href={selectedMode === "manual" ? "/deliveries/manual" : "#"}
+            href={selectedMode === "manual" ? "/deliveries/manual" : selectedMode === "ai" ? "/deliveries/aiPrompt" : "/deliveries/photo"}
             className={`inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r px-5 py-3 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.01] ${selectedOption.accentClass}`}
           >
             {selectedMode === "manual" && <ClipboardPlus className="h-4 w-4" />}
