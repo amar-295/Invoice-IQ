@@ -49,10 +49,12 @@ export default function ManualDeliveryPage() {
   const [newProductName, setNewProductName] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
 
-  const productsForSelectedSeller = useMemo(() => {
-    if (!form.sellerId) return [];
-    return products.filter((product) => String(product.sellerId) === form.sellerId);
-  }, [products, form.sellerId]);
+  const productsForUser = useMemo(() => products, [products]);
+
+  const selectedSeller = useMemo(
+    () => sellers.find((seller) => seller._id === form.sellerId),
+    [sellers, form.sellerId]
+  );
 
   useEffect(() => {
     const fetchFormData = async () => {
@@ -86,15 +88,14 @@ export default function ManualDeliveryPage() {
     setForm((current) => ({
       ...current,
       sellerId,
-      productId: "",
-      unit: "",
     }));
   };
 
   const onSelectProduct = (productId: string) => {
-    const selectedProduct = productsForSelectedSeller.find((item) => item._id === productId);
+    const selectedProduct = productsForUser.find((item) => item._id === productId);
     setForm((current) => ({
       ...current,
+      sellerId: selectedProduct ? String(selectedProduct.sellerId) : current.sellerId,
       productId,
       unit: selectedProduct?.unit || "",
     }));
@@ -253,22 +254,27 @@ export default function ManualDeliveryPage() {
                   <select
                     value={form.productId}
                     onChange={(e) => onSelectProduct(e.target.value)}
-                    disabled={!form.sellerId}
                     className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-60 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                   >
-                    <option value="">Select product</option>
-                    {productsForSelectedSeller.map((product) => (
+                    <option value="">Select product (all your products)</option>
+                    {productsForUser.map((product) => (
                       <option key={product._id} value={product._id}>
-                        {product.name}
+                        {product.name} ({product.unit})
                       </option>
                     ))}
                   </select>
                 </div>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Don&apos;t see your product? Add it below.
+                  All products are loaded by user. Selecting a product auto-selects its seller.
                 </p>
               </div>
             </div>
+
+            {selectedSeller && (
+              <div className="rounded-xl border border-slate-200 p-3 text-xs text-slate-600 dark:border-white/10 dark:text-slate-300">
+                Selected seller: <span className="font-semibold">{selectedSeller.name}</span>
+              </div>
+            )}
 
             <div className="rounded-xl border border-slate-200 p-4 dark:border-white/10 bg-slate-50/70 dark:bg-white/5">
               <p className="text-xs uppercase tracking-wide font-semibold text-slate-600 dark:text-slate-300 mb-3">

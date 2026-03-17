@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ReceiptText
 } from "lucide-react"
+import { cookies } from "next/headers"
 
 type DashboardStats = {
   totalSpendThisMonth: number
@@ -108,9 +109,17 @@ const getDashboardData = async (): Promise<DashboardResponse["data"] | null> => 
   try {
     const now = new Date()
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000"
+    const cookieStore = await cookies()
+    const cookieHeader = cookieStore.toString()
+
     const response = await fetch(
       `${baseUrl}/api/userInterface/dashboardData?month=${now.getMonth() + 1}&year=${now.getFullYear()}`,
       {
+        headers: cookieHeader
+          ? {
+            Cookie: cookieHeader
+          }
+          : undefined,
         cache: "no-store"
       }
     )

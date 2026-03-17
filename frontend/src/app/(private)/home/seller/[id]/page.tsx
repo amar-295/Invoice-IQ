@@ -32,6 +32,34 @@ interface Product {
   unit: string;
 }
 
+interface SellerApiProduct {
+  _id?: string;
+  name?: string;
+  unit?: string;
+  lastDelivery?: {
+    quantity?: string;
+    price?: string;
+    date?: string;
+    unit?: string;
+  } | null;
+}
+
+interface SellerApiResponse {
+  _id?: string;
+  name?: string;
+  address?: string;
+  mobile?: string;
+  nickname?: string;
+  notes?: string;
+  isFavorite?: boolean;
+  summary?: {
+    totalSpend?: number;
+    totalDeliveries?: number;
+    totalProducts?: number;
+  };
+  products?: SellerApiProduct[];
+}
+
 interface PriceInsight {
   id: string;
   product: string;
@@ -59,6 +87,31 @@ interface SellerDetail {
 const getSellerLocation = (address: string): string => {
   const firstSegment = address.split(",")[0]?.trim();
   return firstSegment || "—";
+};
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const formatDate = (value?: string): string => {
+  if (!value) {
+    return "—";
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsedDate);
 };
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -107,21 +160,37 @@ export default function SellerDetailPage({ params }: { params: Promise<{ id: str
         }
 
         const data = await response.json();
-        const sellerData = data.data;
+        const sellerData = (data.data || {}) as SellerApiResponse;
 
         if (sellerData) {
+          const products = Array.isArray(sellerData.products)
+            ? sellerData.products.map((product) => ({
+                id: product._id || "",
+                name: product.name || "Unnamed product",
+                unit: product.unit || "",
+                lastPurchaseDate: formatDate(product.lastDelivery?.date),
+                lastQuantity: product.lastDelivery?.quantity
+                  ? `${product.lastDelivery.quantity} ${product.lastDelivery.unit || product.unit || ""}`.trim()
+                  : "—",
+                lastPrice: product.lastDelivery?.price
+                  ? `₹${product.lastDelivery.price}`
+                  : "—",
+              }))
+            : [];
+
           const transformedSeller: SellerDetail = {
             id: sellerData._id || id,
-            name: sellerData.name,
+            _id: sellerData._id || id,
+            name: sellerData.name || "Unnamed seller",
             address: sellerData.address || "—",
             mobile: sellerData.mobile || "",
             nickname: sellerData.nickname || "",
             notes: sellerData.notes || "",
             isFavorite: sellerData.isFavorite || false,
-            totalSpend: "₹0", // From dashboard data
-            totalDeliveries: 0, // From deliveries
-            totalProducts: 0, // From products
-            products: [],
+            totalSpend: formatCurrency(sellerData.summary?.totalSpend || 0),
+            totalDeliveries: sellerData.summary?.totalDeliveries || 0,
+            totalProducts: sellerData.summary?.totalProducts || products.length,
+            products,
             insights: [],
           };
 

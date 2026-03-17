@@ -32,7 +32,7 @@ const parseNumber = (value: unknown): number => {
 
 const roundToTwo = (value: number): number => Math.round(value * 100) / 100;
 
-const buildRecentTrend = async (): Promise<TrendPoint[]> => {
+const buildRecentTrend = async (userObjectId: mongoose.Types.ObjectId): Promise<TrendPoint[]> => {
     const now = new Date();
     const months: { start: Date; end: Date; label: string }[] = [];
 
@@ -51,6 +51,7 @@ const buildRecentTrend = async (): Promise<TrendPoint[]> => {
     const trend = await Promise.all(
         months.map(async (item) => {
             const deliveries = await ProductSellerModel.find({
+                userId: userObjectId,
                 date: { $gte: item.start, $lt: item.end }
             })
                 .select({ price: 1 })
@@ -86,26 +87,25 @@ export const dashboardDataController = async (req: Request, res: Response): Prom
             return res.status(400).json({ message: "year must be a valid 4-digit value." });
         }
 
-        let userObjectId: mongoose.Types.ObjectId | undefined;
-        if (userId) {
-            if (!mongoose.Types.ObjectId.isValid(userId)) {
-                return res.status(400).json({ message: "userId must be a valid ObjectId." });
-            }
-            userObjectId = new mongoose.Types.ObjectId(userId);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "userId must be a valid ObjectId." });
         }
+
+        const userObjectId = new mongoose.Types.ObjectId(userId);
 
         const startOfMonth = new Date(year, month - 1, 1);
         const startOfNextMonth = new Date(year, month, 1);
 
         const deliveryFilter = {
+            userId: userObjectId,
             date: {
                 $gte: startOfMonth,
                 $lt: startOfNextMonth
             }
         };
 
-        const productFilter = userObjectId ? { userId: userObjectId } : {};
-        const sellerFilter = userObjectId ? ({ userId: userObjectId } as unknown as Record<string, unknown>) : {};
+        const productFilter = { userId: userObjectId };
+        const sellerFilter = ({ userId: userObjectId } as unknown as Record<string, unknown>);
 
         const [
             monthlyDeliveries,
@@ -127,7 +127,7 @@ export const dashboardDataController = async (req: Request, res: Response): Prom
                 { $limit: 5 },
                 { $project: { _id: 0, name: "$_id", total: 1 } }
             ]),
-            buildRecentTrend()
+            buildRecentTrend(userObjectId)
         ]);
 
         const totalSpendThisMonth = roundToTwo(
@@ -215,9 +215,7 @@ export const dashboardDataController = async (req: Request, res: Response): Prom
                 monthlyTrend,
                 aiSummary,
                 notes: {
-                    scope: userObjectId
-                        ? "Products and suppliers are filtered by userId. Deliveries are global because ProductSeller schema has no userId relation yet."
-                        : "Global dashboard (all users) based on current schema."
+                    scope: "Products, suppliers and deliveries are filtered by authenticated userId."
                 }
             }
         });

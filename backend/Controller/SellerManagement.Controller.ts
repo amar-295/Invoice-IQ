@@ -1,6 +1,21 @@
 import type {Request, Response} from "express";
 import mongoose from "mongoose";
+import { ProductSellerModel } from "../Models/delivery.model";
+import { ProductModel } from "../Models/product.model";
 import { SellerModel } from "../Models/seller.model";
+
+const parseAmount = (value: unknown): number => {
+    if (typeof value === "number") {
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    if (typeof value !== "string") {
+        return 0;
+    }
+
+    const normalizedValue = Number(value.replace(/[^\d.-]/g, ""));
+    return Number.isFinite(normalizedValue) ? normalizedValue : 0;
+};
 
 export const CreateSellerController = async (req : Request, res : Response) : Promise<Response> =>{
     try{
@@ -97,13 +112,68 @@ export const GetSellerByIdController = async(req : Request, res : Response) : Pr
         const userObjectId = new mongoose.Types.ObjectId(userId);
         const sellerObjectId = new mongoose.Types.ObjectId(sellerId);
 
-        const seller = await SellerModel.findOne({ _id : sellerObjectId, userId : userObjectId });
+        const [seller, products, deliveries] = await Promise.all([
+            SellerModel.findOne({ _id : sellerObjectId, userId : userObjectId }).lean(),
+            ProductModel.find({ sellerId : sellerObjectId, userId : userObjectId })
+                .select({ _id : 1, name : 1, unit : 1, normalizedName : 1, allies : 1 })
+                .sort({ name : 1 })
+                .lean(),
+            ProductSellerModel.find({ sellerId : sellerObjectId, userId : userObjectId })
+                .select({ _id : 1, productId : 1, quantity : 1, price : 1, date : 1, source : 1, unit : 1 })
+                .sort({ date : -1 })
+                .lean()
+        ]);
 
         if(!seller){
             return res.status(404).json({message : "Seller not found."});
         }
 
-        return res.status(200).json({message : "Seller fetched successfully", data : seller});
+        const latestDeliveryByProductId = new Map<string, typeof deliveries[number]>();
+
+        for (const delivery of deliveries) {
+            const productKey = String(delivery.productId);
+
+            if (!latestDeliveryByProductId.has(productKey)) {
+                latestDeliveryByProductId.set(productKey, delivery);
+            }
+        }
+
+        const sellerProducts = products.map((product) => {
+            const latestDelivery = latestDeliveryByProductId.get(String(product._id));
+
+            return {
+                _id : product._id,
+                name : product.name,
+                unit : product.unit,
+                normalizedName : product.normalizedName,
+                allies : product.allies,
+                lastDelivery : latestDelivery
+                    ? {
+                        _id : latestDelivery._id,
+                        quantity : latestDelivery.quantity,
+                        price : latestDelivery.price,
+                        unit : latestDelivery.unit,
+                        source : latestDelivery.source,
+                        date : latestDelivery.date
+                    }
+                    : null
+            };
+        });
+
+        const totalSpend = deliveries.reduce((sum, delivery) => sum + parseAmount(delivery.price), 0);
+
+        return res.status(200).json({
+            message : "Seller fetched successfully",
+            data : {
+                ...seller,
+                summary : {
+                    totalSpend,
+                    totalDeliveries : deliveries.length,
+                    totalProducts : products.length
+                },
+                products : sellerProducts
+            }
+        });
     }
     catch(e : any){
         return res.status(500).json({message : "Internal Server Error", error : e?.message || "Unknown error"});
