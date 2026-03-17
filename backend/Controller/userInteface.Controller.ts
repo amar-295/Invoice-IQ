@@ -72,7 +72,11 @@ export const dashboardDataController = async (req: Request, res: Response): Prom
         const now = new Date();
         const month = Number(req.query.month ?? now.getMonth() + 1);
         const year = Number(req.query.year ?? now.getFullYear());
-        const userId = req.query.userId ? String(req.query.userId).trim() : undefined;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({ message: "User ID is missing. Please log in again." });
+        }
 
         if (!Number.isInteger(month) || month < 1 || month > 12) {
             return res.status(400).json({ message: "month must be between 1 and 12." });

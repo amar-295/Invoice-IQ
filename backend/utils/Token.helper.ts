@@ -1,10 +1,28 @@
 import jwt from "jsonwebtoken";
 import type { Response } from "express";
+import mongoose from "mongoose";
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
+
+export interface token{
+    userId : mongoose.Types.ObjectId;
+    username : string;
+    email : string;
+    type : "access" | "refresh";
+}
+
+const getJwtSecrets = (): { accessTokenSecret: string; refreshTokenSecret: string } => {
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+
+    if (!accessTokenSecret || !refreshTokenSecret) {
+        throw new Error("ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must be configured.");
+    }
+
+    return { accessTokenSecret, refreshTokenSecret };
+};
 
 export const generateAccessToken = (userId: string, userName: string, email: string): { accessToken: string } => {
+    const { accessTokenSecret } = getJwtSecrets();
     const accessToken = jwt.sign(
         { 
             userId, 
@@ -12,7 +30,7 @@ export const generateAccessToken = (userId: string, userName: string, email: str
             email, 
             type: "access" 
         }, 
-        ACCESS_TOKEN_SECRET, 
+        accessTokenSecret, 
         { expiresIn: "15m" }
     );
     
@@ -20,6 +38,7 @@ export const generateAccessToken = (userId: string, userName: string, email: str
 }
 
 export const generateRefreshToken = (userId: string, userName: string, email: string): { refreshToken: string } => {
+    const { refreshTokenSecret } = getJwtSecrets();
     const refreshToken = jwt.sign(
         { 
             userId, 
@@ -27,7 +46,7 @@ export const generateRefreshToken = (userId: string, userName: string, email: st
             email, 
             type: "refresh" 
         }, 
-        REFRESH_TOKEN_SECRET, 
+        refreshTokenSecret, 
         { expiresIn: "40d" }
     );
     

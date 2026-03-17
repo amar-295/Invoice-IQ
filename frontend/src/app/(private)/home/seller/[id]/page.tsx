@@ -44,10 +44,8 @@ interface SellerDetail {
   id: string;
   _id?: string;
   name: string;
-  location?: string;
   address: string;
   mobile: string;
-  contact?: string;
   nickname?: string;
   notes?: string;
   isFavorite?: boolean;
@@ -57,6 +55,11 @@ interface SellerDetail {
   products: Product[];
   insights: PriceInsight[];
 }
+
+const getSellerLocation = (address: string): string => {
+  const firstSegment = address.split(",")[0]?.trim();
+  return firstSegment || "—";
+};
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -85,7 +88,6 @@ function StatCard({
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function SellerDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const [sellerId, setSellerId] = useState<string | null>(null);
   const [seller, setSeller] = useState<SellerDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -93,11 +95,10 @@ export default function SellerDetailPage({ params }: { params: Promise<{ id: str
     const extractAndFetch = async () => {
       try {
         const { id } = await params;
-        setSellerId(id);
         
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
         const response = await fetch(
-          `${baseUrl}/api/sellerManagement/getSeller?userId=${id}`,
+          `${baseUrl}/api/sellerManagement/getSeller/${id}`,
           { credentials: "include" }
         );
 
@@ -106,17 +107,14 @@ export default function SellerDetailPage({ params }: { params: Promise<{ id: str
         }
 
         const data = await response.json();
-        const sellerData = Array.isArray(data.data) ? data.data[0] : data.data;
+        const sellerData = data.data;
 
         if (sellerData) {
-          // Transform backend data to match frontend interface
           const transformedSeller: SellerDetail = {
             id: sellerData._id || id,
             name: sellerData.name,
-            location: sellerData.address?.split(",")[0] || "—",
             address: sellerData.address || "—",
             mobile: sellerData.mobile || "",
-            contact: sellerData.mobile || "",
             nickname: sellerData.nickname || "",
             notes: sellerData.notes || "",
             isFavorite: sellerData.isFavorite || false,
@@ -191,22 +189,27 @@ export default function SellerDetailPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="flex flex-wrap items-center gap-4 mt-2">
-              {seller.location && seller.location !== "—" && (
+              {seller.address && seller.address !== "—" && (
                 <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                   <MapPin className="w-3.5 h-3.5 shrink-0" />
-                  {seller.location}
+                  {getSellerLocation(seller.address)}
                 </span>
               )}
-              {seller.contact && seller.contact !== "—" && (
+              {seller.mobile && seller.mobile !== "—" && (
                 <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                   <Phone className="w-3.5 h-3.5 shrink-0" />
-                  {seller.contact}
+                  {seller.mobile}
                 </span>
               )}
               {seller.address && seller.address !== "—" && (
                 <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                   <Building2 className="w-3.5 h-3.5 shrink-0" />
                   {seller.address}
+                </span>
+              )}
+              {seller.nickname && (
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                  {seller.nickname}
                 </span>
               )}
             </div>

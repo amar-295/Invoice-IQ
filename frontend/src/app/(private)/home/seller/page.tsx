@@ -25,24 +25,50 @@ interface Seller {
   name: string;
   mobile: string;
   address: string;
-  contact?: string;
   nickname?: string;
   notes?: string;
   isFavorite?: boolean;
-  location?: string;
   lastDelivery?: string;
   monthlySpend?: string;
   status?: "active" | "inactive";
 }
 
-const EMPTY_FORM = { name: "", location: "", address: "", contact: "", nickname: "", notes: "", isFavorite: false };
+type SellerFormState = {
+  name: string;
+  mobile: string;
+  address: string;
+  nickname: string;
+  notes: string;
+  isFavorite: boolean;
+};
+
+const EMPTY_FORM: SellerFormState = { name: "", mobile: "", address: "", nickname: "", notes: "", isFavorite: false };
+
+const mapSellerFromApi = (seller: Partial<Seller>): Seller => ({
+  _id: seller._id,
+  id: seller._id || seller.id,
+  name: seller.name || "Unnamed seller",
+  mobile: seller.mobile || "",
+  address: seller.address || "",
+  nickname: seller.nickname || "",
+  notes: seller.notes || "",
+  isFavorite: Boolean(seller.isFavorite),
+  lastDelivery: seller.lastDelivery,
+  monthlySpend: seller.monthlySpend,
+  status: seller.status,
+});
+
+const getSellerLocation = (address: string): string => {
+  const firstSegment = address.split(",")[0]?.trim();
+  return firstSegment || "—";
+};
 
 export default function SellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
-  const [formErrors, setFormErrors] = useState<{ name?: string }>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string; mobile?: string; address?: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -54,15 +80,18 @@ export default function SellersPage() {
         const response = await fetch(`${baseUrl}/api/sellerManagement/getSeller`, {
           credentials: "include"
         });
+        const data = await response.json();
+        console.log("Fetch Sellers Response:", data);
 
         if (!response.ok) {
+          console.log(data  )
           throw new Error("Failed to fetch sellers");
         }
 
-        const data = await response.json();
-        const sellersList = Array.isArray(data.data) ? data.data : [];
+        const sellersList = Array.isArray(data.data) ? data.data.map(mapSellerFromApi) : [];
         setSellers(sellersList);
       } catch (error) {
+        console.log(error);
         console.error("Error fetching sellers:", error);
         toast.error("Failed to load sellers");
       } finally {
@@ -76,7 +105,9 @@ export default function SellersPage() {
   const filteredSellers = useMemo(() => {
     return sellers.filter((s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.location || "").toLowerCase().includes(searchQuery.toLowerCase())
+      s.mobile.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.nickname || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [sellers, searchQuery]);
 
@@ -91,8 +122,22 @@ export default function SellersPage() {
   }
 
   async function handleSave() {
+    const nextErrors: { name?: string; mobile?: string; address?: string } = {};
+
     if (!form.name.trim()) {
-      setFormErrors({ name: "Seller name is required." });
+      nextErrors.name = "Seller name is required.";
+    }
+
+    if (!form.mobile.trim()) {
+      nextErrors.mobile = "Mobile number is required.";
+    }
+
+    if (!form.address.trim()) {
+      nextErrors.address = "Address is required.";
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
       return;
     }
 
@@ -102,12 +147,13 @@ export default function SellersPage() {
       const response = await fetch(`${baseUrl}/api/sellerManagement/createSeller`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json"
         },
         credentials: "include",
         body: JSON.stringify({
           name: form.name.trim(),
-          mobile: form.contact.trim() || "",
-          address: form.address.trim() || "",
+          mobile: form.mobile.trim(),
+          address: form.address.trim(),
           nickname: form.nickname.trim() || undefined,
           notes: form.notes.trim() || undefined,
           isFavorite: form.isFavorite
@@ -120,7 +166,7 @@ export default function SellersPage() {
       }
 
       const data = await response.json();
-      setSellers((prev) => [data.data, ...prev]);
+      setSellers((prev) => [mapSellerFromApi(data.data), ...prev]);
       toast.success("Seller added successfully!");
       closeModal();
     } catch (error) {
@@ -196,7 +242,7 @@ export default function SellersPage() {
                 index !== 0 ? "border-t border-gray-100 dark:border-white/5" : ""
               }`}
             >
-              {/* Seller Name + Location */}
+              {/* Seller Name + Address */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="shrink-0 w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
                   {seller.isFavorite
@@ -204,12 +250,23 @@ export default function SellersPage() {
                     : <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate leading-snug">
-                    {seller.name}
-                  </p>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate leading-snug">
+                      {seller.name}
+                    </p>
+                    {seller.nickname && (
+                      <span className="inline-flex max-w-[10rem] truncate rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                        {seller.nickname}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Phone className="w-3 h-3 text-gray-400 shrink-0" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{seller.mobile || "—"}</span>
+                  </div>
                   <div className="flex items-center gap-1 mt-0.5">
                     <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{seller.location || "—"}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{getSellerLocation(seller.address)}</span>
                   </div>
                 </div>
               </div>
@@ -387,27 +444,10 @@ export default function SellersPage() {
                 </div>
               </div>
 
-              {/* Location */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Location
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="e.g. Dadar, Mumbai"
-                    value={form.location}
-                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all"
-                  />
-                </div>
-              </div>
-
               {/* Address */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Address
+                  Address <span className="text-red-500 normal-case tracking-normal">*</span>
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -415,27 +455,51 @@ export default function SellersPage() {
                     rows={2}
                     placeholder="e.g. Shop 4, Gokhale Road, Dadar West - 400028"
                     value={form.address}
-                    onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all resize-none"
+                    onChange={(e) => {
+                      setForm((f) => ({ ...f, address: e.target.value }));
+                      if (formErrors.address) {
+                        setFormErrors((current) => ({ ...current, address: undefined }));
+                      }
+                    }}
+                    className={`w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all resize-none ${
+                      formErrors.address
+                        ? "border-red-400 dark:border-red-500"
+                        : "border-gray-200 dark:border-white/10"
+                    }`}
                   />
                 </div>
+                {formErrors.address && (
+                  <p className="text-xs text-red-500 mt-1">{formErrors.address}</p>
+                )}
               </div>
 
-              {/* Contact Number */}
+              {/* Mobile Number */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Contact Number
+                  Mobile Number <span className="text-red-500 normal-case tracking-normal">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     type="tel"
                     placeholder="e.g. +91 98201 12345"
-                    value={form.contact}
-                    onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all"
+                    value={form.mobile}
+                    onChange={(e) => {
+                      setForm((f) => ({ ...f, mobile: e.target.value }));
+                      if (formErrors.mobile) {
+                        setFormErrors((current) => ({ ...current, mobile: undefined }));
+                      }
+                    }}
+                    className={`w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all ${
+                      formErrors.mobile
+                        ? "border-red-400 dark:border-red-500"
+                        : "border-gray-200 dark:border-white/10"
+                    }`}
                   />
                 </div>
+                {formErrors.mobile && (
+                  <p className="text-xs text-red-500 mt-1">{formErrors.mobile}</p>
+                )}
               </div>
 
               {/* Notes */}
