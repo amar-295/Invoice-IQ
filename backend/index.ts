@@ -12,7 +12,7 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 9000;
-const allowedOrigins = ['http://localhost:3000', 'https://invoiceiq-two.vercel.app/',];
+const allowedOrigins = ['http://localhost:3000', 'https://invoiceiq-two.vercel.app',];
 
 app.use("/api",cors({
     origin: allowedOrigins,
