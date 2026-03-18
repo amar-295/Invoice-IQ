@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Moon, Sun, LogIn, UserPlus, Menu, X } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import Image from "next/image";
+import Link from "next/link";
+import { Moon, Sun, LogIn, UserPlus, Menu, X } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const Navbar = () => {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Services", href: "/services" },
+    { name: "Services", href: "/Services" },
     { name: "FAQs", href: "/FrequentlyAskedQuestions" },
     { name: "Documentation", href: "/documentation" },
-  ]
+  ];
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false)
-  }
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -92,7 +92,6 @@ const Navbar = () => {
               </Button>
             ) : (
               <>
-
                 <Button
                   size="sm"
                   className="hidden md:flex items-center gap-2 font-medium rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100"
@@ -114,7 +113,11 @@ const Navbar = () => {
         <div className="bg-white/40 dark:bg-gray-950/30 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl shadow-lg px-4 py-3 flex items-center justify-between w-full">
           {/* Logo */}
           <div className="shrink-0 relative p-1">
-            <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
+            <Link
+              href="/"
+              className="flex items-center"
+              onClick={closeMobileMenu}
+            >
               <div className="transition-all duration-200">
                 <Image
                   src="/Logo.png"
@@ -168,8 +171,9 @@ const Navbar = () => {
 
       {/* Mobile Sliding Menu */}
       <div
-        className={`fixed top-0 right-0 h-full w-[75%] max-w-[300px] bg-white dark:bg-gray-950 shadow-2xl z-40 transform transition-transform duration-300 ease-in-out md:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed top-0 right-0 h-full w-[75%] max-w-[300px] bg-white dark:bg-gray-950 shadow-2xl z-40 transform transition-transform duration-300 ease-in-out md:hidden ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         <div className="flex flex-col h-full p-6 pt-24 font-outfit">
           {/* Navigation Links */}
@@ -233,7 +237,7 @@ const Navbar = () => {
         ></div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

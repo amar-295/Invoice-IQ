@@ -1,4 +1,9 @@
-export type FilterKey = "last7Days" | "lastMonth" | "last6Months" | "lastYear" | "custom";
+export type FilterKey =
+  | "last7Days"
+  | "lastMonth"
+  | "last6Months"
+  | "lastYear"
+  | "custom";
 
 export type InsightDirection = "up" | "down";
 

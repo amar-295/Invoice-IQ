@@ -28,9 +28,23 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+);
 
-type RangeKey = "today" | "lastWeek" | "lastMonth" | "last6Months" | "lastYear" | "last2Years" | "last5Years";
+type RangeKey =
+  | "today"
+  | "lastWeek"
+  | "lastMonth"
+  | "last6Months"
+  | "lastYear"
+  | "last2Years"
+  | "last5Years";
 
 interface PurchaseRow {
   id: string;
@@ -154,20 +168,30 @@ export default function ProductDetailPage({
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
-        const response = await fetch(`${baseUrl}/api/product/${id}/${productId}`, {
-          credentials: "include",
-        });
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const response = await fetch(
+          `${baseUrl}/api/product/${id}/${productId}`,
+          {
+            credentials: "include",
+          },
+        );
 
         const result = await response.json();
         if (!response.ok) {
-          throw new Error(result?.message || "Failed to fetch product details.");
+          throw new Error(
+            result?.message || "Failed to fetch product details.",
+          );
         }
 
         setProduct(result?.data || null);
       } catch (error) {
         console.error("Error fetching product detail:", error);
-        toast.error(error instanceof Error ? error.message : "Failed to load product details.");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to load product details.",
+        );
         setProduct(null);
       } finally {
         setIsLoading(false);
@@ -186,11 +210,15 @@ export default function ProductDetailPage({
       return sorted.filter((row) => row.date.startsWith(selectedMonth));
     }
 
-    return sorted.filter((row) => isDateInRange(new Date(row.date), activeRange));
+    return sorted.filter((row) =>
+      isDateInRange(new Date(row.date), activeRange),
+    );
   }, [purchases, activeRange, selectedMonth]);
 
   const chartBaseData = selectedMonth ? filteredPurchases : purchases;
-  const chartRows = [...chartBaseData].sort((a, b) => a.date.localeCompare(b.date));
+  const chartRows = [...chartBaseData].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
 
   const chartData = {
     labels: chartRows.map((row) => formatMonthLabel(row.date)),
@@ -244,7 +272,9 @@ export default function ProductDetailPage({
     return (
       <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Loading product details...</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+          Loading product details...
+        </h2>
       </div>
     );
   }
@@ -253,8 +283,12 @@ export default function ProductDetailPage({
     return (
       <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[60vh]">
         <Package className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Product not found.</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This product was not found for the selected seller.</p>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+          Product not found.
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          This product was not found for the selected seller.
+        </p>
         <Link
           href={`/home/seller/${id}`}
           className="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1A1D24] border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
@@ -269,7 +303,6 @@ export default function ProductDetailPage({
 
   return (
     <div className="p-6 md:p-8 max-w-400 mx-auto space-y-8">
-
       {/* Header */}
       <div>
         <Link
@@ -287,23 +320,35 @@ export default function ProductDetailPage({
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
             <Store className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-gray-600 dark:text-gray-300">Supplier:</span>
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+              Supplier:
+            </span>
             <span>{product.sellerName}</span>
           </div>
           <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
             <Package className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-gray-600 dark:text-gray-300">Unit:</span>
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+              Unit:
+            </span>
             <span>{product.unit}</span>
           </div>
           <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
             <Tag className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-gray-600 dark:text-gray-300">Normalized:</span>
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+              Normalized:
+            </span>
             <span>{product.normalizedName}</span>
           </div>
           <div className="inline-flex items-center gap-2 bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-xl px-3 py-2">
             <User className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-gray-600 dark:text-gray-300">Aliases:</span>
-            <span>{product.allies.length ? product.allies.map((ally) => ally.name).join(", ") : "—"}</span>
+            <span className="font-medium text-gray-600 dark:text-gray-300">
+              Aliases:
+            </span>
+            <span>
+              {product.allies.length
+                ? product.allies.map((ally) => ally.name).join(", ")
+                : "—"}
+            </span>
           </div>
         </div>
       </div>
@@ -315,8 +360,12 @@ export default function ProductDetailPage({
               <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">Total Deliveries</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{product.analytics.totalPurchases}</p>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Total Deliveries
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {product.analytics.totalPurchases}
+              </p>
             </div>
           </div>
         </div>
@@ -326,8 +375,12 @@ export default function ProductDetailPage({
               <Wallet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">Total Spend</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(product.analytics.totalSpend)}</p>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Total Spend
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(product.analytics.totalSpend)}
+              </p>
             </div>
           </div>
         </div>
@@ -337,8 +390,15 @@ export default function ProductDetailPage({
               <Package className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">Total Quantity</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCompactQuantity(product.analytics.totalQuantity, product.unit)}</p>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Total Quantity
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {formatCompactQuantity(
+                  product.analytics.totalQuantity,
+                  product.unit,
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -348,8 +408,12 @@ export default function ProductDetailPage({
               <Tag className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">Avg Price / Unit</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(product.analytics.averagePricePerUnit)}</p>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Avg Price / Unit
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(product.analytics.averagePricePerUnit)}
+              </p>
             </div>
           </div>
         </div>
@@ -358,12 +422,18 @@ export default function ProductDetailPage({
       {/* Purchase History Controls */}
       <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-5 shadow-xs space-y-4">
         <div>
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Purchase History</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Filter delivery records by time range or specific month.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Purchase History
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Filter delivery records by time range or specific month.
+          </p>
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Time Range</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Time Range
+          </p>
           <div className="flex flex-wrap gap-2">
             {RANGE_OPTIONS.map((option) => {
               const isActive = !selectedMonth && activeRange === option.key;
@@ -388,14 +458,18 @@ export default function ProductDetailPage({
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-gray-400">Select Month</label>
+          <label className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Select Month
+          </label>
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="w-full sm:w-56 px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           />
-          <p className="text-xs text-gray-400">Selecting a month automatically disables time-range filters.</p>
+          <p className="text-xs text-gray-400">
+            Selecting a month automatically disables time-range filters.
+          </p>
           {product.analytics.availableMonths.length > 0 && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Available months: {product.analytics.availableMonths.join(", ")}
@@ -407,8 +481,12 @@ export default function ProductDetailPage({
       {/* Purchase Table */}
       <div>
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Purchase History Table</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Latest delivery and purchase events for this product.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Purchase History Table
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Latest delivery and purchase events for this product.
+          </p>
         </div>
 
         <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl shadow-xs overflow-hidden">
@@ -427,7 +505,9 @@ export default function ProductDetailPage({
                 <div
                   key={row.id}
                   className={`grid grid-cols-[140px_100px_80px_140px_130px_140px] items-center px-6 py-3 text-sm hover:bg-gray-50 dark:hover:bg-white/3 transition-colors ${
-                    index !== 0 ? "border-t border-gray-100 dark:border-white/5" : ""
+                    index !== 0
+                      ? "border-t border-gray-100 dark:border-white/5"
+                      : ""
                   }`}
                 >
                   <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
@@ -438,12 +518,16 @@ export default function ProductDetailPage({
                     <Package className="w-3.5 h-3.5 text-gray-400" />
                     {row.quantityLabel || row.quantity}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-300">{row.unit}</span>
+                  <span className="text-gray-600 dark:text-gray-300">
+                    {row.unit}
+                  </span>
                   <span className="flex items-center gap-1.5 text-gray-900 dark:text-white font-medium">
                     <Tag className="w-3.5 h-3.5 text-gray-400" />
                     {formatCurrency(row.pricePerUnit)}
                   </span>
-                  <span className="text-gray-900 dark:text-white font-semibold">{formatCurrency(totalRowPrice(row))}</span>
+                  <span className="text-gray-900 dark:text-white font-semibold">
+                    {formatCurrency(totalRowPrice(row))}
+                  </span>
                   <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
                     <FileText className="w-3.5 h-3.5 text-gray-400" />
                     {row.source}
@@ -454,7 +538,9 @@ export default function ProductDetailPage({
               {filteredPurchases.length === 0 && (
                 <div className="py-16 px-6 text-center">
                   <Package className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto" />
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-3">No purchases found for current filter.</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-3">
+                    No purchases found for current filter.
+                  </p>
                 </div>
               )}
             </div>
@@ -465,8 +551,12 @@ export default function ProductDetailPage({
       {/* Price Trend */}
       <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-5 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Price Trend</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Price movement from first recorded purchase to most recent purchase.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Price Trend
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Price movement from first recorded purchase to most recent purchase.
+          </p>
         </div>
 
         {chartRows.length > 0 ? (
@@ -481,7 +571,10 @@ export default function ProductDetailPage({
 
         <div className="flex flex-wrap items-center gap-2 mt-4">
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            Latest purchase: {product.analytics.latestPurchaseDate ? `${formatDate(product.analytics.latestPurchaseDate)} at ${formatCurrency(product.analytics.latestPurchasePricePerUnit || 0)}/unit` : "No purchases yet"}
+            Latest purchase:{" "}
+            {product.analytics.latestPurchaseDate
+              ? `${formatDate(product.analytics.latestPurchaseDate)} at ${formatCurrency(product.analytics.latestPurchasePricePerUnit || 0)}/unit`
+              : "No purchases yet"}
           </span>
           <Link
             href={`/home/seller/${id}`}

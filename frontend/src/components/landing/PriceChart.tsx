@@ -13,19 +13,38 @@ const bars = [
   { height: "40%", bg: "bg-primary/40" },
 ];
 
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+];
 
 export default function PriceChart() {
   return (
     <div className="font-outfit bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden text-slate-900 dark:text-slate-100">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Daily Essentials</h4>
-          <p className="font-space-grotesk text-2xl font-bold">Amul Milk (1L Packet)</p>
+          <h4 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+            Daily Essentials
+          </h4>
+          <p className="font-space-grotesk text-2xl font-bold">
+            Amul Milk (1L Packet)
+          </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className="px-3 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 rounded text-xs font-bold">+12.5% Spike</span>
-          <span className="px-3 py-1 bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-300 rounded text-xs font-bold">Forecast: Downward</span>
+          <span className="px-3 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 rounded text-xs font-bold">
+            +12.5% Spike
+          </span>
+          <span className="px-3 py-1 bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-300 rounded text-xs font-bold">
+            Forecast: Downward
+          </span>
         </div>
       </div>
 
@@ -43,7 +62,10 @@ export default function PriceChart() {
             )}
             {"spike" in bar && bar.spike && (
               <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                <span className="material-symbols-outlined text-red-500" style={{ fontSize: "20px" }}>
+                <span
+                  className="material-symbols-outlined text-red-500"
+                  style={{ fontSize: "20px" }}
+                >
                   warning
                 </span>
               </div>

@@ -5,28 +5,28 @@
 
 @theme inline {
   /* PRD DESIGN SYSTEM TOKENS */
-  --color-sovereign: #1E3A8A;
-  --color-azure: #3B82F6;
-  --color-stable: #16A34A;
-  --color-spike: #DC2626;
+  --color-sovereign: #1e3a8a;
+  --color-azure: #3b82f6;
+  --color-stable: #16a34a;
+  --color-spike: #dc2626;
 
-  --color-background: #F4F7FB;
-  --color-surface: #FFFFFF;
-  --color-foreground: #0F172A;
+  --color-background: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-foreground: #0f172a;
 
-  --color-muted: #F8FAFC;
-  --color-muted-foreground: #64748B;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
 
   --color-primary: var(--color-sovereign);
-  --color-primary-foreground: #FFFFFF;
+  --color-primary-foreground: #ffffff;
 
   --color-secondary: var(--color-azure);
-  --color-secondary-foreground: #FFFFFF;
+  --color-secondary-foreground: #ffffff;
 
   --color-destructive: var(--color-spike);
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-foreground: #ffffff;
 
-  --color-border: #E2E8F0;
+  --color-border: #e2e8f0;
 
   --radius-lg: 1rem;
   --radius-md: 0.75rem;
@@ -35,7 +35,7 @@
   --shadow-glow: 0 4px 14px rgba(59, 130, 246, 0.08);
 
   --font-sans: var(--font-outfit);
-  --font-outfit: var(--font-outfit);  
+  --font-outfit: var(--font-outfit);
   --font-space-grotesk: var(--font-space-grotesk);
 }
 
@@ -48,7 +48,7 @@
     @apply bg-background text-foreground font-outfit antialiased;
   }
 
-  * { 
+  * {
     @apply border-border;
   }
 

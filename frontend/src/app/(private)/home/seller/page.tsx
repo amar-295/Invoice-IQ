@@ -28,9 +28,9 @@ interface lastMonthStat {
   deliveries: number;
   totalSpend: number;
 }
-interface monthlyStat{
-  currentMonth : currentMonthStat;
-  lastMonth : lastMonthStat;
+interface monthlyStat {
+  currentMonth: currentMonthStat;
+  lastMonth: lastMonthStat;
 }
 
 interface Seller {
@@ -56,7 +56,14 @@ type SellerFormState = {
   isFavorite: boolean;
 };
 
-const EMPTY_FORM: SellerFormState = { name: "", mobile: "", address: "", nickname: "", notes: "", isFavorite: false };
+const EMPTY_FORM: SellerFormState = {
+  name: "",
+  mobile: "",
+  address: "",
+  nickname: "",
+  notes: "",
+  isFavorite: false,
+};
 
 const mapSellerFromApi = (seller: Partial<Seller>): Seller => ({
   _id: seller._id,
@@ -82,7 +89,11 @@ export default function SellersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
-  const [formErrors, setFormErrors] = useState<{ name?: string; mobile?: string; address?: string }>({});
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    mobile?: string;
+    address?: string;
+  }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingSellerId, setDeletingSellerId] = useState<string | null>(null);
@@ -91,19 +102,25 @@ export default function SellersPage() {
   useEffect(() => {
     const fetchSellers = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
-        const response = await fetch(`${baseUrl}/api/sellerManagement/getSeller`, {
-          credentials: "include"
-        });
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const response = await fetch(
+          `${baseUrl}/api/sellerManagement/getSeller`,
+          {
+            credentials: "include",
+          },
+        );
         const data = await response.json();
         console.log("Fetch Sellers Response:", data);
 
         if (!response.ok) {
-          console.log(data  )
+          console.log(data);
           throw new Error("Failed to fetch sellers");
         }
 
-        const sellersList = Array.isArray(data.data) ? data.data.map(mapSellerFromApi) : [];
+        const sellersList = Array.isArray(data.data)
+          ? data.data.map(mapSellerFromApi)
+          : [];
         setSellers(sellersList);
       } catch (error) {
         console.log(error);
@@ -118,11 +135,12 @@ export default function SellersPage() {
   }, []);
 
   const filteredSellers = useMemo(() => {
-    return sellers.filter((s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.mobile.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.nickname || "").toLowerCase().includes(searchQuery.toLowerCase())
+    return sellers.filter(
+      (s) =>
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.mobile.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.nickname || "").toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [sellers, searchQuery]);
 
@@ -158,22 +176,26 @@ export default function SellersPage() {
 
     try {
       setIsSaving(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
-      const response = await fetch(`${baseUrl}/api/sellerManagement/createSeller`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const response = await fetch(
+        `${baseUrl}/api/sellerManagement/createSeller`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            name: form.name.trim(),
+            mobile: form.mobile.trim(),
+            address: form.address.trim(),
+            nickname: form.nickname.trim() || undefined,
+            notes: form.notes.trim() || undefined,
+            isFavorite: form.isFavorite,
+          }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-          name: form.name.trim(),
-          mobile: form.mobile.trim(),
-          address: form.address.trim(),
-          nickname: form.nickname.trim() || undefined,
-          notes: form.notes.trim() || undefined,
-          isFavorite: form.isFavorite
-        })
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -186,7 +208,9 @@ export default function SellersPage() {
       closeModal();
     } catch (error) {
       console.error("Error saving seller:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save seller");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save seller",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -198,29 +222,39 @@ export default function SellersPage() {
       return;
     }
 
-    const shouldDelete = window.confirm("Delete this seller? This will also delete related products and deliveries.");
+    const shouldDelete = window.confirm(
+      "Delete this seller? This will also delete related products and deliveries.",
+    );
     if (!shouldDelete) {
       return;
     }
 
     try {
       setDeletingSellerId(sellerId);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
-      const response = await fetch(`${baseUrl}/api/sellerManagement/deleteSeller/${sellerId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const response = await fetch(
+        `${baseUrl}/api/sellerManagement/deleteSeller/${sellerId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
 
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result?.message || "Failed to delete seller");
       }
 
-      setSellers((prev) => prev.filter((seller) => (seller._id || seller.id) !== sellerId));
+      setSellers((prev) =>
+        prev.filter((seller) => (seller._id || seller.id) !== sellerId),
+      );
       toast.success("Seller deleted successfully.");
     } catch (error) {
       console.error("Error deleting seller:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete seller");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete seller",
+      );
     } finally {
       setDeletingSellerId(null);
     }
@@ -228,7 +262,6 @@ export default function SellersPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-400 mx-auto space-y-8">
-
       {/* ── Page Header ───────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -277,10 +310,18 @@ export default function SellersPage() {
         <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl shadow-xs overflow-x-auto">
           {/* Table Header */}
           <div className="flex min-w-190 items-center gap-6 px-6 py-3 border-b border-gray-100 dark:border-white/5">
-            <span className="flex-1 min-w-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400">Seller</span>
-            <span className="w-32 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">Deliveries</span>
-            <span className="w-44 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">Monthly Spend</span>
-            <span className="w-16 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">Delete</span>
+            <span className="flex-1 min-w-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+              Seller
+            </span>
+            <span className="w-32 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">
+              Deliveries
+            </span>
+            <span className="w-44 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">
+              Monthly Spend
+            </span>
+            <span className="w-16 shrink-0 text-[11px] font-semibold uppercase tracking-widest text-gray-400 text-right">
+              Delete
+            </span>
             <span className="w-8 shrink-0" />
           </div>
 
@@ -288,7 +329,9 @@ export default function SellersPage() {
             <div
               key={seller._id || seller.id}
               className={`group min-w-190 flex items-center gap-6 px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/3 transition-all ${
-                index !== 0 ? "border-t border-gray-100 dark:border-white/5" : ""
+                index !== 0
+                  ? "border-t border-gray-100 dark:border-white/5"
+                  : ""
               }`}
             >
               {/* Seller Name + Address */}
@@ -297,9 +340,11 @@ export default function SellersPage() {
                 className="flex flex-1 min-w-0 items-center gap-3 pr-2"
               >
                 <div className="shrink-0 w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
-                  {seller.isFavorite
-                    ? <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    : <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                  {seller.isFavorite ? (
+                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  ) : (
+                    <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  )}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
@@ -314,11 +359,15 @@ export default function SellersPage() {
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Phone className="w-3 h-3 text-gray-400 shrink-0" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{seller.mobile || "—"}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {seller.mobile || "—"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
                     <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{getSellerLocation(seller.address)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {getSellerLocation(seller.address)}
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -331,7 +380,9 @@ export default function SellersPage() {
                 <div className="flex items-center gap-1 text-gray-400">
                   <Calendar className="w-3 h-3" />
                 </div>
-                <span className="text-sm font-medium tabular-nums text-gray-700 dark:text-gray-200">{seller.monthlyStats?.currentMonth.deliveries || "—"}</span>
+                <span className="text-sm font-medium tabular-nums text-gray-700 dark:text-gray-200">
+                  {seller.monthlyStats?.currentMonth.deliveries || "—"}
+                </span>
               </Link>
 
               {/* Monthly Spend */}
@@ -342,7 +393,12 @@ export default function SellersPage() {
                 <div className="flex items-center gap-1 text-gray-400">
                   <Wallet className="w-3 h-3" />
                 </div>
-                <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">₹{Number(seller.monthlyStats?.currentMonth.totalSpend || 0).toLocaleString("en-IN")}</span>
+                <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                  ₹
+                  {Number(
+                    seller.monthlyStats?.currentMonth.totalSpend || 0,
+                  ).toLocaleString("en-IN")}
+                </span>
               </Link>
 
               <div className="flex w-16 shrink-0 justify-end">
@@ -396,7 +452,8 @@ export default function SellersPage() {
             No sellers added yet.
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center max-w-xs">
-            Add your first supplier to start tracking purchases and managing deliveries.
+            Add your first supplier to start tracking purchases and managing
+            deliveries.
           </p>
           <button
             onClick={openModal}
@@ -439,11 +496,12 @@ export default function SellersPage() {
 
             {/* Form Body */}
             <div className="px-6 py-5 space-y-4 overflow-y-auto">
-
               {/* ── Favorite Toggle ─────────────────────────── */}
               <button
                 type="button"
-                onClick={() => setForm((f) => ({ ...f, isFavorite: !f.isFavorite }))}
+                onClick={() =>
+                  setForm((f) => ({ ...f, isFavorite: !f.isFavorite }))
+                }
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
                   form.isFavorite
                     ? "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30"
@@ -458,27 +516,38 @@ export default function SellersPage() {
                         : "text-gray-400"
                     }`}
                   />
-                  <span className={`text-sm font-medium ${
-                    form.isFavorite
-                      ? "text-amber-700 dark:text-amber-400"
-                      : "text-gray-600 dark:text-gray-300"
-                  }`}>
+                  <span
+                    className={`text-sm font-medium ${
+                      form.isFavorite
+                        ? "text-amber-700 dark:text-amber-400"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`}
+                  >
                     Mark as Favourite
                   </span>
                 </div>
-                <div className={`w-9 h-5 rounded-full transition-all relative ${
-                  form.isFavorite ? "bg-amber-400" : "bg-gray-200 dark:bg-white/10"
-                }`}>
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                    form.isFavorite ? "left-4.5" : "left-0.5"
-                  }`} />
+                <div
+                  className={`w-9 h-5 rounded-full transition-all relative ${
+                    form.isFavorite
+                      ? "bg-amber-400"
+                      : "bg-gray-200 dark:bg-white/10"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                      form.isFavorite ? "left-4.5" : "left-0.5"
+                    }`}
+                  />
                 </div>
               </button>
 
               {/* Seller Name */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Seller Name <span className="text-red-500 normal-case tracking-normal">*</span>
+                  Seller Name{" "}
+                  <span className="text-red-500 normal-case tracking-normal">
+                    *
+                  </span>
                 </label>
                 <div className="relative">
                   <Store className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -505,7 +574,10 @@ export default function SellersPage() {
               {/* Nickname */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Nickname <span className="text-gray-400 normal-case font-normal tracking-normal">(optional)</span>
+                  Nickname{" "}
+                  <span className="text-gray-400 normal-case font-normal tracking-normal">
+                    (optional)
+                  </span>
                 </label>
                 <div className="relative">
                   <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -513,7 +585,9 @@ export default function SellersPage() {
                     type="text"
                     placeholder="e.g. Om Bhai"
                     value={form.nickname}
-                    onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, nickname: e.target.value }))
+                    }
                     className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all"
                   />
                 </div>
@@ -522,7 +596,10 @@ export default function SellersPage() {
               {/* Address */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Address <span className="text-red-500 normal-case tracking-normal">*</span>
+                  Address{" "}
+                  <span className="text-red-500 normal-case tracking-normal">
+                    *
+                  </span>
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -533,7 +610,10 @@ export default function SellersPage() {
                     onChange={(e) => {
                       setForm((f) => ({ ...f, address: e.target.value }));
                       if (formErrors.address) {
-                        setFormErrors((current) => ({ ...current, address: undefined }));
+                        setFormErrors((current) => ({
+                          ...current,
+                          address: undefined,
+                        }));
                       }
                     }}
                     className={`w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all resize-none ${
@@ -544,14 +624,19 @@ export default function SellersPage() {
                   />
                 </div>
                 {formErrors.address && (
-                  <p className="text-xs text-red-500 mt-1">{formErrors.address}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {formErrors.address}
+                  </p>
                 )}
               </div>
 
               {/* Mobile Number */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Mobile Number <span className="text-red-500 normal-case tracking-normal">*</span>
+                  Mobile Number{" "}
+                  <span className="text-red-500 normal-case tracking-normal">
+                    *
+                  </span>
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -562,7 +647,10 @@ export default function SellersPage() {
                     onChange={(e) => {
                       setForm((f) => ({ ...f, mobile: e.target.value }));
                       if (formErrors.mobile) {
-                        setFormErrors((current) => ({ ...current, mobile: undefined }));
+                        setFormErrors((current) => ({
+                          ...current,
+                          mobile: undefined,
+                        }));
                       }
                     }}
                     className={`w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all ${
@@ -573,14 +661,19 @@ export default function SellersPage() {
                   />
                 </div>
                 {formErrors.mobile && (
-                  <p className="text-xs text-red-500 mt-1">{formErrors.mobile}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {formErrors.mobile}
+                  </p>
                 )}
               </div>
 
               {/* Notes */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wide">
-                  Notes <span className="text-gray-400 normal-case font-normal tracking-normal">(optional)</span>
+                  Notes{" "}
+                  <span className="text-gray-400 normal-case font-normal tracking-normal">
+                    (optional)
+                  </span>
                 </label>
                 <div className="relative">
                   <FileText className="absolute left-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -588,7 +681,9 @@ export default function SellersPage() {
                     rows={3}
                     placeholder="e.g. Delivers every Monday, call before ordering..."
                     value={form.notes}
-                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, notes: e.target.value }))
+                    }
                     className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:focus:border-blue-500 transition-all resize-none"
                   />
                 </div>

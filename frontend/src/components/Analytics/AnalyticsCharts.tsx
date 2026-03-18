@@ -22,7 +22,7 @@ ChartJS.register(
   LineElement,
   BarElement,
   Tooltip,
-  Legend
+  Legend,
 );
 
 function formatCurrency(value: number) {
@@ -164,8 +164,12 @@ export default function AnalyticsCharts({ data }: AnalyticsChartsProps) {
     <>
       <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-5 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Spending Over Time</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Track total spending trend across selected time period.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Spending Over Time
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Track total spending trend across selected time period.
+          </p>
         </div>
         <div className="h-72">
           {data.spendingOverTime.length > 0 ? (
@@ -180,8 +184,12 @@ export default function AnalyticsCharts({ data }: AnalyticsChartsProps) {
 
       <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-5 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Supplier Spending Comparison</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Compare how spending is distributed across suppliers.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Supplier Spending Comparison
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Compare how spending is distributed across suppliers.
+          </p>
         </div>
         <div className="h-80">
           {data.supplierSpending.length > 0 ? (
@@ -196,12 +204,19 @@ export default function AnalyticsCharts({ data }: AnalyticsChartsProps) {
 
       <div className="bg-white dark:bg-[#1A1D24] border border-gray-100 dark:border-white/10 rounded-2xl p-5 shadow-xs">
         <div className="mb-4">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Top Purchased Products</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Products with highest purchased quantities in selected period.</p>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Top Purchased Products
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Products with highest purchased quantities in selected period.
+          </p>
         </div>
         <div className="h-80">
           {data.topProducts.length > 0 ? (
-            <Bar data={productHorizontalBarData} options={productHorizontalBarOptions} />
+            <Bar
+              data={productHorizontalBarData}
+              options={productHorizontalBarOptions}
+            />
           ) : (
             <div className="h-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
               No product purchase data available.

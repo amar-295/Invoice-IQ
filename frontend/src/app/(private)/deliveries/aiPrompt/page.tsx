@@ -3,7 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Bot, CheckCircle2, LoaderCircle, Sparkles, Store, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Bot,
+  CheckCircle2,
+  LoaderCircle,
+  Sparkles,
+  Store,
+  Trash2,
+} from "lucide-react";
 
 type SellerOption = {
   _id: string;
@@ -46,19 +54,23 @@ export default function AIPromptDeliveryPage() {
 
   const selectedSeller = useMemo(
     () => sellers.find((seller) => seller._id === sellerId) || null,
-    [sellers, sellerId]
+    [sellers, sellerId],
   );
 
   useEffect(() => {
     const fetchSellers = async () => {
       try {
         setIsLoadingSellers(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
 
-        const response = await fetch(`${baseUrl}/api/sellerManagement/getSeller`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${baseUrl}/api/sellerManagement/getSeller`,
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
 
         const result = await response.json();
         if (!response.ok) {
@@ -67,7 +79,9 @@ export default function AIPromptDeliveryPage() {
 
         setSellers(Array.isArray(result?.data) ? result.data : []);
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to load sellers.");
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load sellers.",
+        );
       } finally {
         setIsLoadingSellers(false);
       }
@@ -91,7 +105,8 @@ export default function AIPromptDeliveryPage() {
       setIsTransforming(true);
       setHasConfirmed(false);
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
       const response = await fetch(`${baseUrl}/api/delivery/prompt/transform`, {
         method: "POST",
         headers: {
@@ -118,15 +133,23 @@ export default function AIPromptDeliveryPage() {
         return;
       }
 
-      toast.success(`Draft ready with ${items.length} item${items.length > 1 ? "s" : ""}. Review before saving.`);
+      toast.success(
+        `Draft ready with ${items.length} item${items.length > 1 ? "s" : ""}. Review before saving.`,
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to transform prompt.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to transform prompt.",
+      );
     } finally {
       setIsTransforming(false);
     }
   };
 
-  const updateDraftField = (draftId: string, field: keyof DraftItem, value: string) => {
+  const updateDraftField = (
+    draftId: string,
+    field: keyof DraftItem,
+    value: string,
+  ) => {
     setDraftItems((current) =>
       current.map((item) => {
         if (item.draftId !== draftId) {
@@ -145,12 +168,14 @@ export default function AIPromptDeliveryPage() {
           ...item,
           [field]: value,
         };
-      })
+      }),
     );
   };
 
   const removeDraftItem = (draftId: string) => {
-    setDraftItems((current) => current.filter((item) => item.draftId !== draftId));
+    setDraftItems((current) =>
+      current.filter((item) => item.draftId !== draftId),
+    );
     setHasConfirmed(false);
   };
 
@@ -171,7 +196,11 @@ export default function AIPromptDeliveryPage() {
     }
 
     const invalidItem = draftItems.find(
-      (item) => !item.name.trim() || !item.unit.trim() || !item.quantity.trim() || !item.price.trim()
+      (item) =>
+        !item.name.trim() ||
+        !item.unit.trim() ||
+        !item.quantity.trim() ||
+        !item.price.trim(),
     );
 
     if (invalidItem) {
@@ -181,7 +210,8 @@ export default function AIPromptDeliveryPage() {
 
     try {
       setIsSaving(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
 
       const response = await fetch(`${baseUrl}/api/delivery/prompt/save`, {
         method: "POST",
@@ -204,15 +234,23 @@ export default function AIPromptDeliveryPage() {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result?.message || "Failed to save AI prompt deliveries.");
+        throw new Error(
+          result?.message || "Failed to save AI prompt deliveries.",
+        );
       }
 
-      toast.success(result?.message || "AI prompt deliveries saved successfully.");
+      toast.success(
+        result?.message || "AI prompt deliveries saved successfully.",
+      );
       setPrompt("");
       setDraftItems([]);
       setHasConfirmed(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save AI prompt deliveries.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to save AI prompt deliveries.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -224,7 +262,10 @@ export default function AIPromptDeliveryPage() {
       <div className="pointer-events-none absolute -bottom-44 -left-24 h-80 w-80 rounded-full bg-teal-200/30 blur-3xl dark:bg-emerald-500/10" />
 
       <header className="relative space-y-2">
-        <Link href="/deliveries" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+        <Link
+          href="/deliveries"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Deliveries
         </Link>
@@ -232,7 +273,8 @@ export default function AIPromptDeliveryPage() {
           AI Prompt Delivery Entry
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300 max-w-3xl">
-          Pick seller, paste natural language lines, transform into structured rows, verify each item, and save to MongoDB only after confirmation.
+          Pick seller, paste natural language lines, transform into structured
+          rows, verify each item, and save to MongoDB only after confirmation.
         </p>
       </header>
 
@@ -254,7 +296,9 @@ export default function AIPromptDeliveryPage() {
                 disabled={isLoadingSellers}
                 className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 disabled:opacity-60 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
               >
-                <option value="">{isLoadingSellers ? "Loading sellers..." : "Select seller"}</option>
+                <option value="">
+                  {isLoadingSellers ? "Loading sellers..." : "Select seller"}
+                </option>
                 {sellers.map((seller) => (
                   <option key={seller._id} value={seller._id}>
                     {seller.name}
@@ -279,7 +323,8 @@ export default function AIPromptDeliveryPage() {
 
         {selectedSeller && (
           <div className="rounded-xl border border-slate-200 p-3 text-xs text-slate-600 dark:border-white/10 dark:text-slate-300">
-            Selected seller: <span className="font-semibold">{selectedSeller.name}</span>
+            Selected seller:{" "}
+            <span className="font-semibold">{selectedSeller.name}</span>
           </div>
         )}
 
@@ -308,7 +353,11 @@ export default function AIPromptDeliveryPage() {
           disabled={isTransforming}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#1D4ED8] to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60"
         >
-          {isTransforming ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {isTransforming ? (
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           {isTransforming ? "Transforming..." : "Transform Prompt"}
         </button>
       </section>
@@ -316,7 +365,9 @@ export default function AIPromptDeliveryPage() {
       <section className="relative rounded-2xl border border-slate-200 bg-white/95 p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-[#171B24]/95 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Review Draft</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              Review Draft
+            </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Confirm these values before saving to database.
             </p>
@@ -348,32 +399,59 @@ export default function AIPromptDeliveryPage() {
                 </thead>
                 <tbody>
                   {draftItems.map((item) => (
-                    <tr key={item.draftId} className="border-t border-slate-100 dark:border-white/10">
+                    <tr
+                      key={item.draftId}
+                      className="border-t border-slate-100 dark:border-white/10"
+                    >
                       <td className="p-2.5 min-w-44">
                         <input
                           value={item.name}
-                          onChange={(e) => updateDraftField(item.draftId, "name", e.target.value)}
+                          onChange={(e) =>
+                            updateDraftField(
+                              item.draftId,
+                              "name",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                         />
                       </td>
                       <td className="p-2.5 min-w-28">
                         <input
                           value={item.unit}
-                          onChange={(e) => updateDraftField(item.draftId, "unit", e.target.value)}
+                          onChange={(e) =>
+                            updateDraftField(
+                              item.draftId,
+                              "unit",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                         />
                       </td>
                       <td className="p-2.5 min-w-24">
                         <input
                           value={item.quantity}
-                          onChange={(e) => updateDraftField(item.draftId, "quantity", e.target.value)}
+                          onChange={(e) =>
+                            updateDraftField(
+                              item.draftId,
+                              "quantity",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                         />
                       </td>
                       <td className="p-2.5 min-w-28">
                         <input
                           value={item.price}
-                          onChange={(e) => updateDraftField(item.draftId, "price", e.target.value)}
+                          onChange={(e) =>
+                            updateDraftField(
+                              item.draftId,
+                              "price",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                         />
                       </td>
@@ -381,7 +459,13 @@ export default function AIPromptDeliveryPage() {
                         <input
                           type="date"
                           value={item.date}
-                          onChange={(e) => updateDraftField(item.draftId, "date", e.target.value)}
+                          onChange={(e) =>
+                            updateDraftField(
+                              item.draftId,
+                              "date",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                         />
                       </td>
@@ -428,7 +512,11 @@ export default function AIPromptDeliveryPage() {
               disabled={isSaving || !hasConfirmed || draftItems.length === 0}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#0F766E] to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-60"
             >
-              {isSaving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {isSaving ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               {isSaving ? "Saving..." : "Save to MongoDB"}
             </button>
           </>

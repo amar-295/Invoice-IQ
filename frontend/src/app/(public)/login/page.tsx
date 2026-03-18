@@ -1,39 +1,40 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Github, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {  ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 function Login() {
-
   const router = useRouter();
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/loginWithGoogle`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/loginWithGoogle`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
       const data = await response.json();
 
       if (data?.url) {
         router.push(data?.url);
-      }
-      else {
+      } else {
         toast.error("Failed to initiate Google login. Please try again later.");
       }
-    }
-    catch (e) {
+    } catch (e) {
       console.error("Error initiating Google login:", e);
-      toast.error("An error occurred while initiating Google login. Please try again later.");
+      toast.error(
+        "An error occurred while initiating Google login. Please try again later.",
+      );
     }
-  }
-
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-slate-50 dark:bg-[#09090b] relative overflow-hidden font-outfit px-4 pt-32 pb-20 transition-colors duration-300">
@@ -46,11 +47,11 @@ function Login() {
         {/* Logo */}
         <div className="mb-6 drop-shadow-lg">
           <div className="dark:bg-white dark:rounded-2xl dark:px-3 dark:py-2 transition-all duration-200">
-            <Image 
-              src="/Logo.png" 
-              alt="Invoice IQ Logo" 
-              width={160} 
-              height={160} 
+            <Image
+              src="/Logo.png"
+              alt="Invoice IQ Logo"
+              width={160}
+              height={160}
               className="object-contain"
               priority
             />
@@ -72,7 +73,9 @@ function Login() {
           <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-indigo-500/5 opacity-50 pointer-events-none" />
 
           <CardHeader className="border-none bg-transparent pt-10 pb-4 relative z-10 text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mt-2">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+              Welcome Back
+            </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-5 pb-10 pt-4 relative z-10 px-8">
@@ -82,12 +85,16 @@ function Login() {
                 variant="outline"
                 className="w-full py-8 rounded-[1.25rem] border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md text-base font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group/btn"
               >
-                <Image src="/google.svg" alt="Google" width={22} height={22} className="mr-3" />
+                <Image
+                  src="/google.svg"
+                  alt="Google"
+                  width={22}
+                  height={22}
+                  className="mr-3"
+                />
                 Continue with Google
                 <ArrowRight className="ml-auto h-5 w-5 opacity-40 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" />
               </Button>
-
-
             </div>
 
             <div className="flex flex-col gap-4 pt-4">
@@ -97,7 +104,21 @@ function Login() {
                 </div>
               </div>
               <p className="text-center text-[11px] text-gray-500 dark:text-gray-400 px-4 leading-relaxed font-medium">
-                By logging in, you agree to our <Link href="#" className="underline-offset-2 hover:underline text-blue-600 dark:text-blue-400">Terms</Link> & <Link href="#" className="underline-offset-2 hover:underline text-blue-600 dark:text-blue-400">Privacy Policy</Link>.
+                By logging in, you agree to our{" "}
+                <Link
+                  href="#"
+                  className="underline-offset-2 hover:underline text-blue-600 dark:text-blue-400"
+                >
+                  Terms
+                </Link>{" "}
+                &{" "}
+                <Link
+                  href="#"
+                  className="underline-offset-2 hover:underline text-blue-600 dark:text-blue-400"
+                >
+                  Privacy Policy
+                </Link>
+                .
               </p>
             </div>
           </CardContent>
@@ -118,7 +139,7 @@ function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

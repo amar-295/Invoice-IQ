@@ -10,12 +10,20 @@ interface CustomFilterProps {
   customTo: string;
 }
 
-export default function CustomFilter({ filter, customFrom, customTo }: CustomFilterProps) {
+export default function CustomFilter({
+  filter,
+  customFrom,
+  customTo,
+}: CustomFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const updateQueryParams = (updates: { filter?: string; from?: string; to?: string }) => {
+  const updateQueryParams = (updates: {
+    filter?: string;
+    from?: string;
+    to?: string;
+  }) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (updates.filter !== undefined) {

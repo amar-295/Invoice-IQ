@@ -2,13 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Bot,
-  Camera,
-  ClipboardPlus,
-  Sparkles,
-  Upload,
-} from "lucide-react";
+import { Bot, Camera, ClipboardPlus, Sparkles, Upload } from "lucide-react";
 
 type DeliveryMode = "manual" | "photo" | "ai";
 
@@ -57,8 +51,10 @@ export default function ClientSide() {
   const [selectedMode, setSelectedMode] = useState<DeliveryMode>("manual");
 
   const selectedOption = useMemo(
-    () => deliveryOptions.find((option) => option.id === selectedMode) || deliveryOptions[0],
-    [selectedMode]
+    () =>
+      deliveryOptions.find((option) => option.id === selectedMode) ||
+      deliveryOptions[0],
+    [selectedMode],
   );
 
   return (
@@ -93,10 +89,14 @@ export default function ClientSide() {
               </div>
 
               <h2 className="mt-4 text-lg font-bold">{option.title}</h2>
-              <p className={`mt-1 text-xs ${isSelected ? "text-white/80 dark:text-slate-600" : "text-slate-500 dark:text-slate-400"}`}>
+              <p
+                className={`mt-1 text-xs ${isSelected ? "text-white/80 dark:text-slate-600" : "text-slate-500 dark:text-slate-400"}`}
+              >
                 {option.subtitle}
               </p>
-              <p className={`mt-3 text-sm leading-relaxed ${isSelected ? "text-white/90 dark:text-slate-700" : "text-slate-600 dark:text-slate-300"}`}>
+              <p
+                className={`mt-3 text-sm leading-relaxed ${isSelected ? "text-white/90 dark:text-slate-700" : "text-slate-600 dark:text-slate-300"}`}
+              >
                 {option.description}
               </p>
             </button>
@@ -119,7 +119,13 @@ export default function ClientSide() {
           </div>
 
           <Link
-            href={selectedMode === "manual" ? "/deliveries/manual" : selectedMode === "ai" ? "/deliveries/aiPrompt" : "/deliveries/photo"}
+            href={
+              selectedMode === "manual"
+                ? "/deliveries/manual"
+                : selectedMode === "ai"
+                  ? "/deliveries/aiPrompt"
+                  : "/deliveries/photo"
+            }
             className={`inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r px-5 py-3 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.01] ${selectedOption.accentClass}`}
           >
             {selectedMode === "manual" && <ClipboardPlus className="h-4 w-4" />}

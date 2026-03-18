@@ -9,7 +9,7 @@ export const MOCK_SUPPLIERS: Supplier[] = [
     statusVariant: "azure",
     itemCount: 12,
     spikeCount: 0,
-    prices: [120, 125, 122, 130, 128]
+    prices: [120, 125, 122, 130, 128],
   },
   {
     id: "2",
@@ -19,7 +19,7 @@ export const MOCK_SUPPLIERS: Supplier[] = [
     statusVariant: "spike",
     itemCount: 45,
     spikeCount: 3,
-    prices: [100, 105, 115, 140, 165]
+    prices: [100, 105, 115, 140, 165],
   },
   {
     id: "3",
@@ -29,7 +29,7 @@ export const MOCK_SUPPLIERS: Supplier[] = [
     statusVariant: "stable",
     itemCount: 8,
     spikeCount: 0,
-    prices: [95, 90, 92, 85, 80]
+    prices: [95, 90, 92, 85, 80],
   },
   {
     id: "4",
@@ -39,8 +39,8 @@ export const MOCK_SUPPLIERS: Supplier[] = [
     statusVariant: "spike",
     itemCount: 22,
     spikeCount: 1,
-    prices: [200, 210, 205, 230, 225]
-  }
+    prices: [200, 210, 205, 230, 225],
+  },
 ];
 
 export const CATEGORIES = [
@@ -50,5 +50,5 @@ export const CATEGORIES = [
   "Dairy",
   "Spices",
   "Beverages",
-  "Cleaning"
+  "Cleaning",
 ];

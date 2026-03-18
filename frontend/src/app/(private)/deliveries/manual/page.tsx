@@ -1,10 +1,16 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarDays, IndianRupee, Package, Plus, Store } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  IndianRupee,
+  Package,
+  Plus,
+  Store,
+} from "lucide-react";
 
 type SellerOption = {
   _id: string;
@@ -53,29 +59,39 @@ export default function ManualDeliveryPage() {
 
   const selectedSeller = useMemo(
     () => sellers.find((seller) => seller._id === form.sellerId),
-    [sellers, form.sellerId]
+    [sellers, form.sellerId],
   );
 
   useEffect(() => {
     const fetchFormData = async () => {
       try {
         setIsLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
 
-        const response = await fetch(`${baseUrl}/api/delivery/manual/form-data`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${baseUrl}/api/delivery/manual/form-data`,
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
 
         const result = await response.json();
         if (!response.ok) {
           throw new Error(result?.message || "Failed to fetch form data.");
         }
 
-        setSellers(Array.isArray(result?.data?.sellers) ? result.data.sellers : []);
-        setProducts(Array.isArray(result?.data?.products) ? result.data.products : []);
+        setSellers(
+          Array.isArray(result?.data?.sellers) ? result.data.sellers : [],
+        );
+        setProducts(
+          Array.isArray(result?.data?.products) ? result.data.products : [],
+        );
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to load form data.");
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load form data.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -92,40 +108,54 @@ export default function ManualDeliveryPage() {
   };
 
   const onSelectProduct = (productId: string) => {
-    const selectedProduct = productsForUser.find((item) => item._id === productId);
+    const selectedProduct = productsForUser.find(
+      (item) => item._id === productId,
+    );
     setForm((current) => ({
       ...current,
-      sellerId: selectedProduct ? String(selectedProduct.sellerId) : current.sellerId,
+      sellerId: selectedProduct
+        ? String(selectedProduct.sellerId)
+        : current.sellerId,
       productId,
       unit: selectedProduct?.unit || "",
     }));
   };
 
   const handleSubmit = async () => {
-    if (!form.sellerId || !form.productId || !form.unit || !form.quantity.trim() || !form.price.trim()) {
+    if (
+      !form.sellerId ||
+      !form.productId ||
+      !form.unit ||
+      !form.quantity.trim() ||
+      !form.price.trim()
+    ) {
       toast.error("Seller, product, unit, quantity and price are required.");
       return;
     }
 
     try {
       setIsSaving(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
 
-      const response = await fetch(`${baseUrl}/api/delivery/addDelivery/byManual`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${baseUrl}/api/delivery/addDelivery/byManual`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            sellerId: form.sellerId,
+            productId: form.productId,
+            unit: form.unit,
+            quantity: form.quantity.trim(),
+            price: form.price.trim(),
+            date: form.date,
+          }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-          sellerId: form.sellerId,
-          productId: form.productId,
-          unit: form.unit,
-          quantity: form.quantity.trim(),
-          price: form.price.trim(),
-          date: form.date,
-        }),
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -135,7 +165,9 @@ export default function ManualDeliveryPage() {
       toast.success("Manual delivery saved successfully.");
       setForm(initialForm);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save delivery.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save delivery.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -154,20 +186,24 @@ export default function ManualDeliveryPage() {
 
     try {
       setIsCreatingProduct(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
 
-      const response = await fetch(`${baseUrl}/api/delivery/manual/add-product`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${baseUrl}/api/delivery/manual/add-product`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            sellerId: form.sellerId,
+            name: newProductName.trim(),
+            unit: newProductUnit.trim(),
+          }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-          sellerId: form.sellerId,
-          name: newProductName.trim(),
-          unit: newProductUnit.trim(),
-        }),
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -199,7 +235,9 @@ export default function ManualDeliveryPage() {
 
       toast.success(result?.message || "Product saved successfully.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create product.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create product.",
+      );
     } finally {
       setIsCreatingProduct(false);
     }
@@ -208,11 +246,16 @@ export default function ManualDeliveryPage() {
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
       <header className="space-y-2">
-        <Link href="/deliveries" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+        <Link
+          href="/deliveries"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Deliveries
         </Link>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">Manual Delivery Entry</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          Manual Delivery Entry
+        </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
           Select seller and product, then fill quantity, price and date.
         </p>
@@ -220,7 +263,9 @@ export default function ManualDeliveryPage() {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 md:p-6 dark:border-white/10 dark:bg-[#171B24] space-y-5">
         {isLoading ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Loading sellers and products...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Loading sellers and products...
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,14 +310,16 @@ export default function ManualDeliveryPage() {
                   </select>
                 </div>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  All products are loaded by user. Selecting a product auto-selects its seller.
+                  All products are loaded by user. Selecting a product
+                  auto-selects its seller.
                 </p>
               </div>
             </div>
 
             {selectedSeller && (
               <div className="rounded-xl border border-slate-200 p-3 text-xs text-slate-600 dark:border-white/10 dark:text-slate-300">
-                Selected seller: <span className="font-semibold">{selectedSeller.name}</span>
+                Selected seller:{" "}
+                <span className="font-semibold">{selectedSeller.name}</span>
               </div>
             )}
 
@@ -326,7 +373,12 @@ export default function ManualDeliveryPage() {
                 </label>
                 <input
                   value={form.quantity}
-                  onChange={(e) => setForm((current) => ({ ...current, quantity: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((current) => ({
+                      ...current,
+                      quantity: e.target.value,
+                    }))
+                  }
                   placeholder="e.g. 25"
                   className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                 />
@@ -340,7 +392,12 @@ export default function ManualDeliveryPage() {
                   <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     value={form.price}
-                    onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((current) => ({
+                        ...current,
+                        price: e.target.value,
+                      }))
+                    }
                     placeholder="e.g. 1250"
                     className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                   />
@@ -358,7 +415,12 @@ export default function ManualDeliveryPage() {
                   <input
                     type="date"
                     value={form.date}
-                    onChange={(e) => setForm((current) => ({ ...current, date: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((current) => ({
+                        ...current,
+                        date: e.target.value,
+                      }))
+                    }
                     className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-white/10 dark:bg-black/20 dark:text-slate-100"
                   />
                 </div>

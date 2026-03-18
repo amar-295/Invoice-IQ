@@ -22,7 +22,7 @@ export function BottomNav() {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          
+
           if (item.primary) {
             return (
               <Link
@@ -46,13 +46,15 @@ export function BottomNav() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center w-full py-2 transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <Icon className={cn("w-5 h-5 mb-1", isActive && "stroke-[2.5px]")} />
-              <span className="text-[10px] font-semibold">
-                {item.label}
-              </span>
+              <Icon
+                className={cn("w-5 h-5 mb-1", isActive && "stroke-[2.5px]")}
+              />
+              <span className="text-[10px] font-semibold">{item.label}</span>
             </Link>
           );
         })}

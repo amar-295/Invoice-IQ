@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Users, 
-  FileText, 
-  BarChart3, 
-  Settings, 
-  BookText
-} from "lucide-react";
+import { Users, FileText, BarChart3, Settings, BookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -43,12 +37,19 @@ export function Sidebar() {
               href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all group",
-                isActive 
-                  ? "bg-primary text-primary-foreground shadow-md" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
-              <Icon className={cn("w-5 h-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+              <Icon
+                className={cn(
+                  "w-5 h-5",
+                  isActive
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground group-hover:text-foreground",
+                )}
+              />
               {item.label}
             </Link>
           );
@@ -62,7 +63,9 @@ export function Sidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold leading-none">Amar Kirana</span>
-            <span className="text-[10px] text-muted-foreground">Premium Plan</span>
+            <span className="text-[10px] text-muted-foreground">
+              Premium Plan
+            </span>
           </div>
         </div>
       </div>
