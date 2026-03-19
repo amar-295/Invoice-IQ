@@ -14,7 +14,7 @@ const cookieOptions: CookieOptions = {
     // Browsers reject SameSite=None cookies unless Secure=true.
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
-    // Do NOT set domain for localhost
+    path: "/",
 };
 
 
