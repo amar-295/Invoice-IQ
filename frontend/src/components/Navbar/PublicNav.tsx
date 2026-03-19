@@ -16,7 +16,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Services", href: "/Services" },
     { name: "FAQs", href: "/FrequentlyAskedQuestions" },
-    { name: "Documentation", href: "/documentation" },
+    { name: "Documentation", href: "/Documentation" },
   ];
 
   const toggleMobileMenu = () => {
@@ -26,6 +26,7 @@ const Navbar = () => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+  
 
   return (
     <>
@@ -41,14 +42,14 @@ const Navbar = () => {
                   alt="InvoiceIQ Logo"
                   height={120}
                   width={120}
-                  className="dark:hidden shrink-0"
+                  className="block dark:hidden shrink-0"
                 />
                 <Image
-                  src="/darkLogo.png"
+                  src="/LogoInDarkMode.png"
                   alt="InvoiceIQ Logo"
-                  height={120}
+                  height={110}
                   width={120}
-                  className="hidden dark:block shrink-0"
+                  className="hidden dark:flex shrink-0"
                 />
               </div>
             </Link>
@@ -205,24 +206,15 @@ const Navbar = () => {
               <>
                 <Button
                   variant="outline"
-                  className="w-full flex items-center justify-center gap-2 font-medium rounded-xl text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700"
+                  className="w-full flex items-center justify-center gap-2 font-medium rounded-xl text-gray-700 dark:text-gray-950 border-gray-300 dark:border-gray-700"
                   asChild
                 >
                   <Link href="/login" onClick={closeMobileMenu}>
                     <LogIn className="h-4 w-4" />
-                    Log In
+                    Get Started
                   </Link>
                 </Button>
 
-                <Button
-                  className="w-full flex items-center justify-center gap-2 font-medium rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100"
-                  asChild
-                >
-                  <Link href="/signup" onClick={closeMobileMenu}>
-                    <UserPlus className="h-4 w-4" />
-                    Sign Up
-                  </Link>
-                </Button>
               </>
             )}
           </div>

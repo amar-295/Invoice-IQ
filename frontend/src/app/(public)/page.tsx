@@ -61,7 +61,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Link
-              href="/signup"
+              href="/login"
               className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-xl shadow-primary/30 text-lg hover:-translate-y-0.5 transition-all"
             >
               Start Free Trial
@@ -80,7 +80,7 @@ export default function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-emerald-400/40" />
               </div>
             </div>
-            <div className="relative h-135 w-full">
+            <div className="relative h-135 w-full hidden md:block">
               <Image
                 src="/HeroSectionDarkMode.png"
                 alt="Hero Section Image"
@@ -91,6 +91,24 @@ export default function LandingPage() {
               />
               <Image
                 src="/HeroSectionLightMode.png"
+                alt="Hero Section Image"
+                fill
+                className="object-cover flex dark:hidden object-top"
+                sizes="(max-width: 768px) 100vw, 80vw"
+                priority
+              />
+            </div>
+            <div className="relative h-135 w-full block md:hidden">
+              <Image
+                src="/MobileHeroSectionDarkMode.png"
+                alt="Hero Section Image"
+                fill
+                className="object-cover hidden dark:flex object-top"
+                sizes="(max-width: 768px) 100vw, 80vw"
+                priority
+              />
+              <Image
+                src="/MobileHeroSectionLightMode.png"
                 alt="Hero Section Image"
                 fill
                 className="object-cover flex dark:hidden object-top"
@@ -372,7 +390,7 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/login"
               className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/30 text-lg hover:scale-105 transition-all"
             >
               Try it Now

@@ -88,7 +88,7 @@ export const handleGoogleAuthentication = async (req: Request, res: Response): P
             const hashedRefreshToken = hashString(refreshToken);
 
             newUser.refreshToken = hashedRefreshToken;
-            const savedUser = await newUser.save();
+            await newUser.save();
 
             res.cookie("refreshToken", refreshToken, {
                 ...cookieOptions,
