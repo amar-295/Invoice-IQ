@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { CookieOptions, Request, Response } from "express";
 import { UserModel } from "../Models/auth.model";
 import { generateAccessToken, generateRefreshToken } from "../utils/Token.helper";
 import { hashString } from "../utils/Hash.helper";
@@ -7,11 +7,13 @@ const clientId = process.env.GOOGLE_CLIENT_ID!;
 const redirectUri = process.env.GOOGLE_REDIRECT_URI!;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
-const cookieOptions = {
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions: CookieOptions = {
     httpOnly: true,
-    secure: false, // Must be false for localhost HTTP
-    sameSite: "lax" as const, // 'lax' works for same-site localhost requests
-    path: "/"
+    // Browsers reject SameSite=None cookies unless Secure=true.
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     // Do NOT set domain for localhost
 };
 
