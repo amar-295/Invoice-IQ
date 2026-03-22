@@ -7,14 +7,12 @@ const clientId = process.env.GOOGLE_CLIENT_ID!;
 const redirectUri = process.env.GOOGLE_REDIRECT_URI!;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
-const isProduction = process.env.NODE_ENV === "production";
-
 const cookieOptions: CookieOptions = {
     httpOnly: true,
-    // Browsers reject SameSite=None cookies unless Secure=true.
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    // Do NOT set domain for localhost
+    secure: true,
+    sameSite: "lax",
+    domain: ".vercel.app",
+    path: "/",
 };
 
 
@@ -142,20 +140,20 @@ export const getMe = (req: Request, res: Response): Response => {
 };
 
 export const handleLogoutUser = async (req: Request, res: Response): Promise<Response> => {
-    try{    
-        const {refreshToken} = req.cookies;
-        if(!refreshToken){
+    try {
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) {
             return res.status(400).json({ message: "User is already Logged Out!!" });
         }
 
         const hashedRefreshToken = hashString(refreshToken);
         const user = await UserModel.findOne({ refreshToken: hashedRefreshToken });
-        if(!user){
+        if (!user) {
             res.clearCookie("refreshToken", cookieOptions);
             res.clearCookie("accessToken", cookieOptions);
             return res.status(400).json({ message: "User is already Logged Out!!" });
-        }    
-        
+        }
+
         user.refreshToken = null;
         await user.save();
 
@@ -163,7 +161,7 @@ export const handleLogoutUser = async (req: Request, res: Response): Promise<Res
         res.clearCookie("accessToken", cookieOptions);
         return res.status(200).json({ message: "User logged out successfully!" });
     }
-    catch(e : any){
+    catch (e: any) {
         console.log("Error during logout:", e);
         return res.status(500).json({ message: "Internal server error", error: e?.message || "Unknown error", });
     }
