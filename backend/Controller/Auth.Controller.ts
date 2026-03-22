@@ -135,7 +135,7 @@ export const handleGoogleAuthentication = async (req: Request, res: Response): P
             ...cookieOptions,
             maxAge: 40 * 24 * 60 * 60 * 1000, // 40 days,  
         });
-        return res.status(200).json({ message: "User logged in successfully via Google!", isLoggedIn: true, username: user.userName, email: user.email });
+        return res.redirect(`${process.env.NEXT_PUBLIC_API_URL}/home`);
     }
     catch (e: any) {
         console.error("Error during Google authentication:", e);
