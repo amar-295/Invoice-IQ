@@ -7,11 +7,12 @@ const clientId = process.env.GOOGLE_CLIENT_ID!;
 const redirectUri = process.env.GOOGLE_REDIRECT_URI!;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions: CookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    // domain: ".vercel.app",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
 };
 
